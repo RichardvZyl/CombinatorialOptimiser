@@ -12,18 +12,16 @@ namespace AssessmentPreparation.Algorithms;
 public sealed class BranchAndBoundSolver : ITspSolver
 {
     public string Name => "Branch and Bound (exact)";
+    public TspParadigm Paradigm => TspParadigm.Exact;
 
-    public TspResult Solve(DistanceMatrix m) => SolverRunner.Timed(Name, m, () => SolveImpl(m));
+    public TspResult Solve(DistanceMatrix m) => SolverRunner.Timed(Name, Paradigm, m, () => SolveImpl(m));
 
     private static int[] SolveImpl(DistanceMatrix m)
     {
         var n = m.Count;
-
         if (n >= 31)
             throw new InvalidOperationException(
-                $"Branch and Bound requires n < 31 (got {n}). " +
-                "The bitmask would overflow a 32-bit integer.");
-
+                $"Branch and Bound requires n < 31 (got {n}). The bitmask would overflow a 32-bit integer.");
         if (n <= 1) return Enumerable.Range(0, n).ToArray();
         if (n == 2) return new[] { 0, 1 };
 
@@ -47,7 +45,6 @@ public sealed class BranchAndBoundSolver : ITspSolver
         var permutation = new int[n];
         permutation[0] = 0;
         var bestPermutation = new int[n];
-        // Seed with a Nearest Neighbor upper bound for pruning.
         var bestLen = new NearestNeighborSolver().Solve(m).Distance;
 
         Search(1, 0, 0.0, 1);
@@ -57,7 +54,6 @@ public sealed class BranchAndBoundSolver : ITspSolver
         {
             var bound = currentCost + LowerBound(last, mask);
             if (bound >= bestLen) return;
-
             if (depth == n)
             {
                 var cycleCost = currentCost + m[last, 0];
@@ -68,16 +64,10 @@ public sealed class BranchAndBoundSolver : ITspSolver
                 }
                 return;
             }
-
             var remaining = new List<int>(n - depth);
             for (var next = 1; next < n; next++)
-            {
-                if ((mask & (1 << next)) != 0) continue;
-                remaining.Add(next);
-            }
-
+                if ((mask & (1 << next)) == 0) remaining.Add(next);
             remaining.Sort((a, b) => m[last, a].CompareTo(m[last, b]));
-
             foreach (var next in remaining)
             {
                 var nextCost = currentCost + m[last, next];
@@ -91,10 +81,7 @@ public sealed class BranchAndBoundSolver : ITspSolver
         {
             var sum = min1[current] + min1[0];
             for (var i = 1; i < n; i++)
-            {
-                if ((visitedMask & (1 << i)) != 0) continue;
-                sum += min1[i] + min2[i];
-            }
+                if ((visitedMask & (1 << i)) == 0) sum += min1[i] + min2[i];
             return sum * 0.5;
         }
     }

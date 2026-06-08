@@ -3,19 +3,23 @@ using AssessmentPreparation.Model;
 namespace AssessmentPreparation.Algorithms;
 
 /// <summary>
-/// Local-search improvement. Starts from a Nearest-Neighbor tour, then repeatedly
-/// reverses a segment whenever doing so shortens the sequence (the classic 2-opt
-/// "uncross two edges" move). Runs until no improving move remains.
+/// Local-search improvement. Starts from a Nearest-Neighbor tour (or a
+/// provided seed), then repeatedly reverses a segment whenever doing so
+/// shortens the sequence. Runs until no improving move remains.
 /// Complexity: O(n²) per sweep.
 /// </summary>
 public sealed class TwoOptSolver : ITspSolver
 {
     public string Name => "2-opt (local search)";
+    public TspParadigm Paradigm => TspParadigm.Improvement;
+
+    /// <summary>Optional seed permutation. If null, uses Nearest Neighbor.</summary>
+    public int[]? Seed { get; init; }
 
     public TspResult Solve(DistanceMatrix m) =>
-        SolverRunner.Timed(Name, m, () =>
+        SolverRunner.Timed(Name, Paradigm, m, () =>
         {
-            var permutation = new NearestNeighborSolver().Solve(m).Order.ToArray();
+            var permutation = Seed ?? new NearestNeighborSolver().Solve(m).Order.ToArray();
             var n = permutation.Length;
             if (n < 4) return permutation;
 
@@ -47,11 +51,6 @@ public sealed class TwoOptSolver : ITspSolver
 
     private static void Reverse(int[] order, int i, int k)
     {
-        while (i < k)
-        {
-            (order[i], order[k]) = (order[k], order[i]);
-            i++;
-            k--;
-        }
+        while (i < k) { (order[i], order[k]) = (order[k], order[i]); i++; k--; }
     }
 }

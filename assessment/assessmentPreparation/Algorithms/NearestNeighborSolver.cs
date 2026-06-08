@@ -10,9 +10,10 @@ namespace AssessmentPreparation.Algorithms;
 public sealed class NearestNeighborSolver : ITspSolver
 {
     public string Name => "Nearest Neighbor (greedy)";
+    public TspParadigm Paradigm => TspParadigm.Construction;
 
     public TspResult Solve(DistanceMatrix m) =>
-        SolverRunner.Timed(Name, m, () =>
+        SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var n = m.Count;
             var used = new bool[n];
@@ -25,17 +26,11 @@ public sealed class NearestNeighborSolver : ITspSolver
                 var current = permutation[step - 1];
                 var bestIndex = -1;
                 var bestCost = double.PositiveInfinity;
-
                 for (var next = 0; next < n; next++)
                 {
                     if (used[next]) continue;
-                    if (m[current, next] < bestCost)
-                    {
-                        bestCost = m[current, next];
-                        bestIndex = next;
-                    }
+                    if (m[current, next] < bestCost) { bestCost = m[current, next]; bestIndex = next; }
                 }
-
                 permutation[step] = bestIndex;
                 used[bestIndex] = true;
             }
