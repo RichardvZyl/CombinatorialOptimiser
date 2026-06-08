@@ -1,0 +1,14 @@
+E:\Richard's files\Documents\Repos\PermutationOptimiser\bin\Debug\net10.0\CombinatorialOptimiser.exe
+E:\Richard's files\Documents\Repos\PermutationOptimiser\bin\Debug\net10.0\CombinatorialOptimiser.deps.json
+E:\Richard's files\Documents\Repos\PermutationOptimiser\bin\Debug\net10.0\CombinatorialOptimiser.runtimeconfig.json
+E:\Richard's files\Documents\Repos\PermutationOptimiser\bin\Debug\net10.0\CombinatorialOptimiser.dll
+E:\Richard's files\Documents\Repos\PermutationOptimiser\bin\Debug\net10.0\CombinatorialOptimiser.pdb
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.GeneratedMSBuildEditorConfig.editorconfig
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.AssemblyInfoInputs.cache
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.AssemblyInfo.cs
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.csproj.CoreCompileInputs.cache
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.dll
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\refint\CombinatorialOptimiser.dll
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.pdb
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\CombinatorialOptimiser.genruntimeconfig.cache
+E:\Richard's files\Documents\Repos\PermutationOptimiser\obj\Debug\net10.0\ref\CombinatorialOptimiser.dll
