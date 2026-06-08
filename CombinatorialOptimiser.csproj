@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CombinatorialOptimiser</RootNamespace>
+    <AssemblyName>CombinatorialOptimiser</AssemblyName>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <!-- CA5394: Random is not securely random. This project uses System.Random only for
+         metaheuristic search (not cryptography or security), so the guidance does not apply. -->
+    <!-- CA1515: This is an executable, but core types (Node, DistanceMatrix, SolverResult, etc.)
+         are tested via InternalsVisibleTo and programmatic external use is expected. -->
+    <!-- CA1814: Multidimensional arrays are used intentionally for cost, conflict, and DP tables.
+         Switching to jagged arrays would harm cache locality and readability in optimisation code. -->
+    <!-- CA1303: This is a CLI tool with no localization requirements. Literal strings are
+         intentional and localizing them would add complexity with no user benefit. -->
+    <NoWarn>CA5394;CA1515;CA1814;CA1303</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CombinatorialOptimiser.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="CombinatorialOptimiser.Tests/**" />
+    <EmbeddedResource Remove="CombinatorialOptimiser.Tests/**" />
+    <None Remove="CombinatorialOptimiser.Tests/**" />
+  </ItemGroup>
+
+</Project>
