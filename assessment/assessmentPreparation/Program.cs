@@ -17,10 +17,13 @@ var cities = Enumerable.Range(0, n)
 
 var matrix = new DistanceMatrix(cities);
 
-// Brute force is infeasible beyond ~10 cities
-ITspSolver[] solvers = n <= 10
-    ? [new BruteForceSolver(), new NearestNeighborSolver()]
-    : [new NearestNeighborSolver()];
+// Held-Karp DP extends exact solving to ~18 cities
+ITspSolver[] solvers = n switch
+{
+    <= 10 => [new BruteForceSolver(), new HeldKarpSolver(), new NearestNeighborSolver()],
+    <= 18 => [new HeldKarpSolver(), new NearestNeighborSolver()],
+    _ => [new NearestNeighborSolver()],
+};
 
 Console.WriteLine($"\n=== {n} random cities ===");
 Console.WriteLine($"{"Algorithm",-30}{"Distance",12}{"Gap",10}{"Time",14}");
@@ -30,7 +33,7 @@ double? optimal = null;
 foreach (var solver in solvers)
 {
     var r = solver.Solve(matrix);
-    if (optimal is null && solver is BruteForceSolver)
+    if (optimal is null && solver is BruteForceSolver or HeldKarpSolver)
         optimal = r.Distance;
     var gap = optimal is { } opt && opt > 0
         ? $" {(r.Distance - opt) / opt * 100,+6:0.0}%"
