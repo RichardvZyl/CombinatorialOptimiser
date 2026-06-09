@@ -1,4 +1,4 @@
-using AssessmentPreparation.Model;
+using PermutationOptimiser.Model;
 
 namespace PermutationOptimiser.Tests;
 

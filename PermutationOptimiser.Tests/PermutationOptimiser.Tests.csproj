@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\assessment\assessmentPreparation\assessmentPreparation.csproj" />
+    <ProjectReference Include="..\PermutationOptimiser.csproj" />
   </ItemGroup>
 
 </Project>
