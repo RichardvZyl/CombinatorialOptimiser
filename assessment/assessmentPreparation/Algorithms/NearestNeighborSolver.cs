@@ -7,12 +7,12 @@ namespace AssessmentPreparation.Algorithms;
 /// nearest unvisited one. Fast and simple, but myopic.
 /// Complexity: O(n²) time, O(n) space.
 /// </summary>
-public sealed class NearestNeighborSolver : ITspSolver
+public sealed class NearestNeighborSolver : ISolver
 {
     public string Name => "Nearest Neighbor (greedy)";
-    public TspParadigm Paradigm => TspParadigm.Construction;
+    public SolverParadigm Paradigm => SolverParadigm.Construction;
 
-    public TspResult Solve(DistanceMatrix m) =>
+    public SolverResult Solve(DistanceMatrix m) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var n = m.Count;
