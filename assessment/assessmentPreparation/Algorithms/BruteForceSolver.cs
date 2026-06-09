@@ -7,12 +7,12 @@ namespace AssessmentPreparation.Algorithms;
 /// orderings of the remaining cities, keeping the shortest.
 /// Complexity: O(n!) time, O(n) space.
 /// </summary>
-public sealed class BruteForceSolver : ITspSolver
+public sealed class BruteForceSolver : ISolver
 {
     public string Name => "Brute Force (exact)";
-    public TspParadigm Paradigm => TspParadigm.Exact;
+    public SolverParadigm Paradigm => SolverParadigm.Exact;
 
-    public TspResult Solve(DistanceMatrix m) =>
+    public SolverResult Solve(DistanceMatrix m) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var remaining = Enumerable.Range(1, m.Count - 1).ToArray();

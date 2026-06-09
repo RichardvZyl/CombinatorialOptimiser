@@ -2,32 +2,21 @@ using AssessmentPreparation.Model;
 
 namespace AssessmentPreparation.Algorithms;
 
-/// <summary>
-/// Held-Karp dynamic programming. Exact, O(2^n · n^2) time, O(2^n · n) memory.
-/// dp[mask, j] = cheapest cost to start at city 0, include exactly the cities
-/// in mask, and end at j.
-/// </summary>
-public sealed class HeldKarpSolver : ITspSolver
+public sealed class HeldKarpSolver : ISolver
 {
     public string Name => "Held-Karp DP (exact)";
-    public TspParadigm Paradigm => TspParadigm.Exact;
-
-    public TspResult Solve(DistanceMatrix m) =>
+    public SolverParadigm Paradigm => SolverParadigm.Exact;
+    public SolverResult Solve(DistanceMatrix m) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var n = m.Count;
             if (n <= 1) return Enumerable.Range(0, n).ToArray();
-            if (n >= 31)
-                throw new InvalidOperationException(
-                    $"Held-Karp requires n < 31 (got {n}). The 2^{n} DP table would exceed int capacity.");
-
+            if (n >= 31) throw new InvalidOperationException("Held-Karp requires n < 31 (got " + n + ").");
             var totalMasks = 1 << n;
-            var dp = new double[totalMasks, n];
-            var parent = new int[totalMasks, n];
+            var dp = new double[totalMasks, n]; var parent = new int[totalMasks, n];
             for (var mask = 0; mask < totalMasks; mask++)
                 for (var j = 0; j < n; j++) dp[mask, j] = double.PositiveInfinity;
             dp[1, 0] = 0;
-
             for (var mask = 1; mask < totalMasks; mask++)
             {
                 if ((mask & 1) == 0) continue;
@@ -41,34 +30,15 @@ public sealed class HeldKarpSolver : ITspSolver
                         if ((mask & (1 << next)) != 0) continue;
                         var nextMask = mask | (1 << next);
                         var candidate = costToLast + m[last, next];
-                        if (candidate < dp[nextMask, next])
-                        {
-                            dp[nextMask, next] = candidate;
-                            parent[nextMask, next] = last;
-                        }
+                        if (candidate < dp[nextMask, next]) { dp[nextMask, next] = candidate; parent[nextMask, next] = last; }
                     }
                 }
             }
-
             var fullSet = totalMasks - 1;
-            var bestEnd = 0;
-            var bestCost = double.PositiveInfinity;
-            for (var last = 1; last < n; last++)
-            {
-                var candidate = dp[fullSet, last] + m[last, 0];
-                if (candidate < bestCost) { bestCost = candidate; bestEnd = last; }
-            }
-
-            var permutation = new int[n];
-            var maskNow = fullSet;
-            var node = bestEnd;
-            for (var i = n - 1; i >= 0; i--)
-            {
-                permutation[i] = node;
-                var prev = parent[maskNow, node];
-                maskNow ^= (1 << node);
-                node = prev;
-            }
+            var bestEnd = 0; var bestCost = double.PositiveInfinity;
+            for (var last = 1; last < n; last++) { var c = dp[fullSet, last] + m[last, 0]; if (c < bestCost) { bestCost = c; bestEnd = last; } }
+            var permutation = new int[n]; var maskNow = fullSet; var node = bestEnd;
+            for (var i = n - 1; i >= 0; i--) { permutation[i] = node; var prev = parent[maskNow, node]; maskNow ^= (1 << node); node = prev; }
             return permutation;
         });
 }

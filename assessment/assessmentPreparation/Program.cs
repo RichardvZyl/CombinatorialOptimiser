@@ -1,44 +1,48 @@
 using AssessmentPreparation.Algorithms;
 using AssessmentPreparation.Model;
 
-// Generate a small random set of cities and compare brute force vs. greedy.
-Console.Write("Enter number of cities (4-10 for brute force, or higher for NN): ");
-var input = Console.ReadLine()?.Trim();
-if (!int.TryParse(input, out var n) || n < 2)
+ISolver[] AllSolvers() => new ISolver[]
 {
-    Console.WriteLine("Running default demo with 8 cities.");
-    n = 8;
-}
-
-var rng = new Random(42);
-var cities = Enumerable.Range(0, n)
-    .Select(i => new City($"City {i}", rng.Next(0, 500), rng.Next(0, 500)))
-    .ToArray();
-
-var matrix = new DistanceMatrix(cities);
-
-// Held-Karp DP extends exact solving to ~18 cities
-ITspSolver[] solvers = n switch
-{
-    <= 10 => [new BruteForceSolver(), new HeldKarpSolver(), new NearestNeighborSolver()],
-    <= 18 => [new HeldKarpSolver(), new NearestNeighborSolver()],
-    _ => [new NearestNeighborSolver()],
+    new BruteForceSolver(),
+    new BranchAndBoundSolver(),
+    new HeldKarpSolver(),
+    new NearestNeighborSolver(),
+    new ChristofidesSolver { UseExactMatching = true },
+    new ChristofidesSolver { UseExactMatching = false },
+    new TwoOptSolver(),
+    new ThreeOptSolver(),
+    new LinKernighanSolver(),
+    new IteratedLocalSearchSolver(),
+    new SimulatedAnnealingSolver(),
+    new GeneticAlgorithmSolver(),
 };
 
-Console.WriteLine($"\n=== {n} random cities ===");
-Console.WriteLine($"{"Algorithm",-30}{"Distance",12}{"Gap",10}{"Time",14}");
-Console.WriteLine(new string('-', 68));
+Console.Write("Enter number of destinations: ");
+var input = Console.ReadLine()?.Trim();
+if (!int.TryParse(input, out var n) || n < 2) { Console.WriteLine("Running demo with 8 nodes."); n = 8; }
+
+var rng = new Random(42);
+var nodes = Enumerable.Range(0, n).Select(i => new Node("N" + i, rng.Next(0, 500), rng.Next(0, 500))).ToArray();
+var matrix = new DistanceMatrix(nodes);
+var solvers = n <= 10 ? AllSolvers() : AllSolvers().Where(s => s is not BruteForceSolver).ToArray();
 
 double? optimal = null;
+var results = new List<SolverResult>();
 foreach (var solver in solvers)
 {
     var r = solver.Solve(matrix);
-    if (optimal is null && solver is BruteForceSolver or HeldKarpSolver)
-        optimal = r.Distance;
-    var gap = optimal is { } opt && opt > 0
-        ? $" {(r.Distance - opt) / opt * 100,+6:0.0}%"
-        : "   n/a";
-    Console.WriteLine($"{r.Algorithm,-30}{r.Distance,10:0.00}{gap,10}{r.Elapsed.TotalMilliseconds,11:0.000} ms");
+    results.Add(r);
+    if (solver is HeldKarpSolver or BruteForceSolver) optimal ??= r.Distance;
 }
 
-Console.WriteLine("\nDone. Brute force is exact but O(n!); NN is fast but approximate.");
+Console.WriteLine();
+Console.WriteLine("=== " + n + " random nodes ===");
+Console.WriteLine(string.Format("{0,-38}{1,-14}{2,10}{3,10}{4,14}", "Algorithm", "Paradigm", "Distance", "Gap", "Time"));
+Console.WriteLine(new string('-', 88));
+foreach (var r in results)
+{
+    var gap = optimal is { } opt && opt > 0 ? string.Format("{0,7:0.0}%", (r.Distance - opt) / opt * 100) : "   n/a";
+    Console.WriteLine(string.Format("{0,-38}{1,-14}{2,10:0.00}{3,10}{4,11:0.000} ms", r.Algorithm, r.Paradigm, r.Distance, gap, r.Elapsed.TotalMilliseconds));
+}
+Console.WriteLine();
+Console.WriteLine("Done.");

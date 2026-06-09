@@ -9,10 +9,10 @@ public class DistanceMatrix
 {
     private readonly double[,] _costs;
 
-    public IReadOnlyList<City> Nodes { get; }
+    public IReadOnlyList<Node> Nodes { get; }
     public int Count => Nodes.Count;
 
-    public DistanceMatrix(IReadOnlyList<City> nodes)
+    public DistanceMatrix(IReadOnlyList<Node> nodes)
     {
         ArgumentNullException.ThrowIfNull(nodes);
         if (nodes.Count == 0)
@@ -42,9 +42,9 @@ public class DistanceMatrix
     }
 }
 
-public static class CityExtensions
+public static class NodeExtensions
 {
-    public static double DistanceTo(this City a, City b)
+    public static double DistanceTo(this Node a, Node b)
     {
         var dx = a.X - b.X;
         var dy = a.Y - b.Y;
