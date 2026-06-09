@@ -49,3 +49,4 @@ public static class SolverRunner
         return new TspResult(name, paradigm, order, m.TourLength(order), Stopwatch.GetElapsedTime(sw));
     }
 }
+// Paradigm classification applied
