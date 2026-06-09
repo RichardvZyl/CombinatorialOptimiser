@@ -1,28 +1,19 @@
-using AssessmentPreparation.Model;
+using PermutationOptimiser.Model;
 
-namespace AssessmentPreparation.Algorithms;
+namespace PermutationOptimiser.Algorithms;
 
-/// <summary>
-/// Exact solver. Fixes city 0 as the first city and enumerates all (n-1)!
-/// orderings of the remaining cities, keeping the shortest.
-/// Complexity: O(n!) time, O(n) space.
-/// </summary>
 public sealed class BruteForceSolver : ISolver
 {
     public string Name => "Brute Force (exact)";
     public SolverParadigm Paradigm => SolverParadigm.Exact;
-
     public SolverResult Solve(DistanceMatrix m) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var remaining = Enumerable.Range(1, m.Count - 1).ToArray();
-            int[]? best = null;
-            var bestCost = double.PositiveInfinity;
-
+            int[]? best = null; var bestCost = double.PositiveInfinity;
             foreach (var perm in Permute(remaining))
             {
-                var order = new int[m.Count];
-                order[0] = 0;
+                var order = new int[m.Count]; order[0] = 0;
                 Array.Copy(perm, 0, order, 1, perm.Length);
                 var cost = m.TourLength(order);
                 if (cost < bestCost) { bestCost = cost; best = order; }

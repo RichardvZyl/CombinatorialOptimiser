@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PermutationOptimiser.csproj" />
+  <Project Path="PermutationOptimiser.Tests/PermutationOptimiser.Tests.csproj" />
+</Solution>

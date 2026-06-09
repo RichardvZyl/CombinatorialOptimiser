@@ -1,5 +1,5 @@
-using AssessmentPreparation.Algorithms;
-using AssessmentPreparation.Model;
+using PermutationOptimiser.Algorithms;
+using PermutationOptimiser.Model;
 
 namespace PermutationOptimiser.Tests;
 
