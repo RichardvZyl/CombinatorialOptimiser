@@ -6,29 +6,55 @@ public sealed class BruteForceSolver : ISolver
 {
     public string Name => "Brute Force (exact)";
     public SolverParadigm Paradigm => SolverParadigm.Exact;
+
     public SolverResult Solve(DistanceMatrix m) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
-            var remaining = Enumerable.Range(1, m.Count - 1).ToArray();
-            int[]? best = null; var bestCost = double.PositiveInfinity;
-            foreach (var perm in Permute(remaining))
+            var n = m.Count;
+            if (n <= 1) return new[] { 0 };
+            var order = new int[n];
+            order[0] = 0;
+            var remaining = Enumerable.Range(1, n - 1).ToArray();
+            var permuteInput = (int[])remaining.Clone();
+            int[] best = null!;
+            var bestCost = double.PositiveInfinity;
+
+            foreach (var perm in Permute(permuteInput, 0))
             {
-                var order = new int[m.Count]; order[0] = 0;
                 Array.Copy(perm, 0, order, 1, perm.Length);
                 var cost = m.TourLength(order);
-                if (cost < bestCost) { bestCost = cost; best = order; }
+                if (cost < bestCost)
+                {
+                    bestCost = cost;
+                    best = (int[])order.Clone();
+                }
             }
-            return best ?? new[] { 0 };
+            return best;
         });
 
-    private static IEnumerable<int[]> Permute(int[] a, int start = 0)
+    private static IEnumerable<int[]> Permute(int[] a, int start)
     {
-        if (start >= a.Length) { yield return a.ToArray(); yield break; }
-        for (var i = start; i < a.Length; i++)
+        // Heap's non-recursive algorithm to generate all permutations.
+        var n = a.Length;
+        var c = new int[n];
+        yield return (int[])a.Clone();
+
+        var i = 0;
+        while (i < n)
         {
-            (a[start], a[i]) = (a[i], a[start]);
-            foreach (var perm in Permute(a, start + 1)) yield return perm;
-            (a[start], a[i]) = (a[i], a[start]);
+            if (c[i] < i)
+            {
+                var swapIndex = i % 2 == 0 ? 0 : c[i];
+                (a[swapIndex], a[i]) = (a[i], a[swapIndex]);
+                yield return (int[])a.Clone();
+                c[i]++;
+                i = 0;
+            }
+            else
+            {
+                c[i] = 0;
+                i++;
+            }
         }
     }
 }
