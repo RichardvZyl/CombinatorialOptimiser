@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CombinatorialOptimiser.csproj" />
+  <Project Path="CombinatorialOptimiser.Tests/CombinatorialOptimiser.Tests.csproj" />
+</Solution>

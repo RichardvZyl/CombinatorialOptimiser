@@ -1,19 +1,39 @@
-# PermutationOptimiser -- Codebase Overview
+# CombinatorialOptimiser -- Codebase Overview
 
 ## Summary
-A C# .NET console application that solves the Traveling Salesman Problem (TSP)
-using **twelve algorithm variants** across four paradigms.
+A C# .NET console application that solves combinatorial optimisation problems
+across three domains:
+- **Permutation** (order all n nodes to minimise total cost, e.g. TSP) --
+  eleven algorithm variants across four paradigms.
+- **SubsetSelection** (0/1 knapsack: choose items to maximise value within a
+  capacity) -- five solvers.
+- **ConstraintAssignment** (graph colouring: label entities so no conflicting
+  pair shares a label) -- four solvers.
 
-> **Generic model**: The domain type is `Node` (not `City`) because the same
-> algorithms apply to scheduling, wiring, network routing, and any other
-> permutation optimisation problem.
+> **Generic model**: The Permutation domain type is `Node` (not `City`)
+> because the same algorithms apply to scheduling, wiring, network routing,
+> and any other permutation optimisation problem.
 
 ## Architecture
-**Pattern**: Strategy -- each algorithm implements `ISolver`, and `Program.cs`
-dispatches to all of them. Solvers are classified by `SolverParadigm` enum.
+**Pattern**: Strategy -- each algorithm implements `ISolver<TProblem, TResult>`,
+specialised per domain (`ISolver<DistanceMatrix, PermutationResult>`,
+`ISolver<SelectionProblem, SelectionResult>`,
+`ISolver<AssignmentProblem, AssignmentResult>`). `Program.cs` dispatches across
+the Permutation solvers via the non-generic `ISolverBase` marker. Solvers are
+classified by the shared `SolverParadigm` enum.
+
+Shared metaheuristic scaffolding lives in `Core/Metaheuristics/`:
+`SimulatedAnnealingBase<TProblem, TSolution>`,
+`GeneticAlgorithmBase<TProblem, TChromosome>`, and
+`IteratedLocalSearchBase<TProblem, TSolution>` implement the
+temperature/population/perturbation loops; each domain's SA/GA/ILS solvers are
+thin subclasses that supply the domain-specific moves and objective.
 
 ## Key Abstractions
-- **ISolver**: Common contract with `Name`, `Paradigm`, `Solve(DistanceMatrix)`
+- **ISolverBase**: Non-generic marker (`Name`, `Paradigm`) for cross-domain collections
+- **ISolver\<TProblem, TResult\>**: `Solve(TProblem) -> TResult`
 - **SolverParadigm**: Exact, Construction, Improvement, Reduction
-- **DistanceMatrix**: Precomputed cost lookup, Euclidean or raw matrix
-- **SolverResult**: Immutable result with Algorithm, Paradigm, Order, Distance, Elapsed
+- **SolverResultBase**: Common `Algorithm`, `Paradigm`, `Elapsed` fields
+- **DistanceMatrix / PermutationResult**: Precomputed cost lookup (Euclidean or raw) / Order, Distance (Permutation)
+- **SelectionProblem / SelectionResult**: Items, Capacity / Selected, TotalValue, TotalCost (SubsetSelection)
+- **AssignmentProblem / AssignmentResult**: Entities, Conflicts / Labels, LabelCount (ConstraintAssignment)
