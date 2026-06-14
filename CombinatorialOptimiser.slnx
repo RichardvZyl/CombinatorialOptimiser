@@ -1,4 +1,5 @@
 <Solution>
-  <Project Path="CombinatorialOptimiser.csproj" />
+  <Project Path="src/CombinatorialOptimiser/CombinatorialOptimiser.csproj" />
+  <Project Path="CombinatorialOptimiser.Cli/CombinatorialOptimiser.Cli.csproj" />
   <Project Path="CombinatorialOptimiser.Tests/CombinatorialOptimiser.Tests.csproj" />
 </Solution>

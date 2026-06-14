@@ -1,19 +1,37 @@
 # CombinatorialOptimiser
 
-A dependency-free .NET 10 console app that solves combinatorial optimisation
-problems across three domains: **Permutation** (TSP-style ordering),
-**SubsetSelection** (0/1 knapsack), and **ConstraintAssignment** (graph
-colouring). The Permutation domain is the primary CLI focus and provides
-**eleven classic algorithms** across **four paradigms**, printing distance,
-gap-to-optimal, and run time for side-by-side comparison.
+A dependency-free .NET 10 combinatorial optimisation **library**, plus a demo
+**CLI**, solving problems across three domains: **Permutation** (TSP-style
+ordering), **SubsetSelection** (0/1 knapsack), and **ConstraintAssignment**
+(graph colouring). Provides **20+ solvers** across **four paradigms** (Exact,
+Construction, Improvement, Reduction).
 
-## Quick start
+## Quick start (CLI demo)
 
 ```bash
-dotnet run -c Release                          # interactive prompt + demos
-dotnet run -c Release -- --cities 10          # 10 random cities, all solvers
-dotnet run -c Release -- --cities 8 --solver HeldKarp  # single solver
+dotnet run --project CombinatorialOptimiser.Cli -c Release                         # interactive prompt + demos
+dotnet run --project CombinatorialOptimiser.Cli -c Release -- --cities 10          # 10 random cities, all solvers
+dotnet run --project CombinatorialOptimiser.Cli -c Release -- --cities 8 --solver HeldKarp  # single solver
 ```
+
+## Using the library
+
+Reference the `CombinatorialOptimiser` NuGet package, then pick a solver
+directly or let `SolverRegistry` recommend one based on problem size:
+
+```csharp
+using CombinatorialOptimiser.Core;
+
+var matrix = new DistanceMatrix(nodes);
+var solver = SolverRegistry.RecommendPermutation(matrix.Count);
+var result = solver.Solve(matrix);
+// or, with cancellation support:
+var result = await solver.SolveAsync(matrix, cancellationToken);
+```
+
+`SolverRegistry` also exposes `RecommendSelection`, `RecommendAssignment`, and
+`AllPermutationSolvers` for enumerating every applicable solver at a given
+problem size.
 
 ## Run the tests
 
@@ -24,14 +42,15 @@ dotnet test CombinatorialOptimiser.slnx -c Release
 ## Project layout
 
 ```
-CombinatorialOptimiser/
-├── Program.cs                    # entry point: CLI args, interactive prompt, demo datasets (Permutation)
-├── Core/                          # shared model: ISolver<TProblem,TResult>, SolverResultBase, Node, DistanceMatrix
-│   └── Metaheuristics/             # shared SA / GA / ILS base classes
-├── Permutation/                   # 11 solver implementations (TSP-style)
-├── SubsetSelection/                # 0/1 knapsack: 5 solvers
-├── ConstraintAssignment/            # graph colouring: 4 solvers
-└── CombinatorialOptimiser.Tests/  # xUnit test project (62 tests)
+CombinatorialOptimiser.slnx
+├── src/CombinatorialOptimiser/    # the LIBRARY (packable NuGet project)
+│   ├── Core/                       # ISolver<TProblem,TResult>, SolverResultBase, Node, DistanceMatrix, SolverRegistry
+│   │   └── Metaheuristics/          # shared SA / GA / ILS base classes
+│   ├── Permutation/                # 11 solver implementations (TSP-style)
+│   ├── SubsetSelection/             # 0/1 knapsack: 5 solvers
+│   └── ConstraintAssignment/         # graph colouring: 4 solvers
+├── CombinatorialOptimiser.Cli/    # demo console app
+└── CombinatorialOptimiser.Tests/  # xUnit test project
 ```
 
 ## The 11 Permutation solvers

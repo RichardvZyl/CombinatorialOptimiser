@@ -8,8 +8,10 @@ internal sealed class GaAssignmentSolver : GeneticAlgorithmBase<AssignmentProble
     public string Name => "Genetic Algorithm (uniform crossover + repair)";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
 
-    public AssignmentResult Solve(AssignmentProblem problem) =>
-        AssignmentSolverRunner.Timed(Name, Paradigm, problem, () => RunEvolution(problem));
+    public AssignmentResult Solve(AssignmentProblem problem) => Solve(problem, CancellationToken.None);
+
+    public AssignmentResult Solve(AssignmentProblem problem, CancellationToken ct) =>
+        AssignmentSolverRunner.Timed(Name, Paradigm, problem, () => RunEvolution(problem, ct));
 
     protected override int[] CreateSeed(AssignmentProblem problem, Random rng) => new DsaturSolver().Solve(problem).Labels;
 
@@ -40,7 +42,7 @@ internal sealed class GaAssignmentSolver : GeneticAlgorithmBase<AssignmentProble
 
     protected override int[] LocalImprove(AssignmentProblem problem, int[] chromosome) => Repair(problem, chromosome);
     protected override int[] Clone(int[] chromosome) => (int[])chromosome.Clone();
-    protected override bool IsDuplicate(List<int[]> population, int[] candidate) => population.Any(p => p.SequenceEqual(candidate));
+    protected override bool IsDuplicate(IReadOnlyList<int[]> population, int[] candidate) => population.Any(p => p.SequenceEqual(candidate));
 
     // Reassigns any vertex that conflicts with an earlier same-labelled vertex to the smallest label not used by its earlier neighbours.
     private static int[] Repair(AssignmentProblem problem, int[] chromosome)

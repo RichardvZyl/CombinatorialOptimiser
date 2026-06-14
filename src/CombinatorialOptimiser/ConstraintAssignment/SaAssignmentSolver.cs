@@ -8,17 +8,19 @@ internal sealed class SaAssignmentSolver : SimulatedAnnealingBase<AssignmentProb
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
 
-    public AssignmentResult Solve(AssignmentProblem problem) =>
+    public AssignmentResult Solve(AssignmentProblem problem) => Solve(problem, CancellationToken.None);
+
+    public AssignmentResult Solve(AssignmentProblem problem, CancellationToken ct) =>
         AssignmentSolverRunner.Timed(Name, Paradigm, problem, () =>
         {
             var initial = new DsaturSolver().Solve(problem).Labels;
-            return RunAnnealing(problem, initial);
+            return RunAnnealing(problem, initial, ct);
         });
 
     protected override double GetCost(AssignmentProblem problem, int[] solution) => Objective(problem, solution);
     protected override int[] Clone(int[] solution) => (int[])solution.Clone();
 
-    protected override double GetInitialTemperature(AssignmentProblem problem, int[] initial, Random rng)
+    protected override double ComputeDefaultInitialTemperature(AssignmentProblem problem, int[] initial, Random rng)
     {
         var n = initial.Length;
         var deltas = new List<double>();

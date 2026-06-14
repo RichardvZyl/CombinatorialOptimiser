@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CombinatorialOptimiser</RootNamespace>
+    <AssemblyName>CombinatorialOptimiser</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>CombinatorialOptimiser</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Richard van Zyl</Authors>
+    <Description>A dependency-free combinatorial optimisation library for permutation (TSP), subset selection (0/1 knapsack), and constraint assignment (graph colouring). Provides 20+ solvers across exact, construction, improvement, and reduction paradigms.</Description>
+    <PackageProjectUrl>https://github.com/RichardvZyl/CombinatorialOptimiser</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RichardvZyl/CombinatorialOptimiser.git</RepositoryUrl>
+    <PackageTags>optimisation; tsp; knapsack; graph-colouring; combinatorial; heuristic; algorithm</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <!-- CA5394: Random is not securely random. This project uses System.Random only for
+         metaheuristic search (not cryptography or security), so the guidance does not apply. -->
+    <!-- CA1515: This is a packable library; its public types (Node, DistanceMatrix, ISolver,
+         SolverResult, SolverRegistry, etc.) are the intended public API. The "make types internal"
+         guidance targets applications, not libraries. -->
+    <!-- CA1814: Multidimensional arrays are used intentionally for cost, conflict, and DP tables.
+         Switching to jagged arrays would harm cache locality and readability in optimisation code. -->
+    <!-- CA1716: 'Step' is a meaningful mathematical name (SA step function), not a VB 'Step' keyword issue in C#. Renaming would harm readability. -->
+    <NoWarn>CA5394;CA1515;CA1814;CA1716</NoWarn>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CombinatorialOptimiser.Tests" />
+    <InternalsVisibleTo Include="CombinatorialOptimiser.Cli" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

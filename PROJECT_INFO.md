@@ -1,8 +1,9 @@
 # CombinatorialOptimiser -- Codebase Overview
 
 ## Summary
-A C# .NET console application that solves combinatorial optimisation problems
-across three domains:
+A C# .NET library (`src/CombinatorialOptimiser/`, packable as a NuGet
+package), plus a demo console app (`CombinatorialOptimiser.Cli/`), that solves
+combinatorial optimisation problems across three domains:
 - **Permutation** (order all n nodes to minimise total cost, e.g. TSP) --
   eleven algorithm variants across four paradigms.
 - **SubsetSelection** (0/1 knapsack: choose items to maximise value within a
@@ -18,9 +19,10 @@ across three domains:
 **Pattern**: Strategy -- each algorithm implements `ISolver<TProblem, TResult>`,
 specialised per domain (`ISolver<DistanceMatrix, PermutationResult>`,
 `ISolver<SelectionProblem, SelectionResult>`,
-`ISolver<AssignmentProblem, AssignmentResult>`). `Program.cs` dispatches across
-the Permutation solvers via the non-generic `ISolverBase` marker. Solvers are
-classified by the shared `SolverParadigm` enum.
+`ISolver<AssignmentProblem, AssignmentResult>`). The CLI's `Program.cs`
+dispatches across the Permutation solvers via the non-generic `ISolverBase`
+marker, and `SolverRegistry` recommends/enumerates solvers by problem size.
+Solvers are classified by the shared `SolverParadigm` enum.
 
 Shared metaheuristic scaffolding lives in `Core/Metaheuristics/`:
 `SimulatedAnnealingBase<TProblem, TSolution>`,

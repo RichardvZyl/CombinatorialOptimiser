@@ -8,17 +8,19 @@ internal sealed class SaSelectionSolver : SimulatedAnnealingBase<SelectionProble
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
 
-    public SelectionResult Solve(SelectionProblem problem) =>
+    public SelectionResult Solve(SelectionProblem problem) => Solve(problem, CancellationToken.None);
+
+    public SelectionResult Solve(SelectionProblem problem, CancellationToken ct) =>
         SelectionSolverRunner.Timed(Name, Paradigm, problem, () =>
         {
             var initial = new GreedySelectionSolver().Solve(problem).Selected;
-            return RunAnnealing(problem, initial);
+            return RunAnnealing(problem, initial, ct);
         });
 
     protected override double GetCost(SelectionProblem problem, bool[] solution) => Objective(problem, solution);
     protected override bool[] Clone(bool[] solution) => (bool[])solution.Clone();
 
-    protected override double GetInitialTemperature(SelectionProblem problem, bool[] initial, Random rng)
+    protected override double ComputeDefaultInitialTemperature(SelectionProblem problem, bool[] initial, Random rng)
     {
         var n = initial.Length;
         var deltas = new List<double>();

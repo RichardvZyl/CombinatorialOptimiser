@@ -7,15 +7,17 @@ internal sealed class SimulatedAnnealingSolver : SimulatedAnnealingBase<Distance
 {
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
-    public PermutationResult Solve(DistanceMatrix m) =>
+    public PermutationResult Solve(DistanceMatrix m) => Solve(m, CancellationToken.None);
+
+    public PermutationResult Solve(DistanceMatrix m, CancellationToken ct) =>
         SolverRunner.Timed(Name, Paradigm, m, () =>
         {
             var initial = new NearestNeighborSolver().Solve(m).Order.ToArray();
-            return initial.Length < 4 ? initial : RunAnnealing(m, initial);
+            return initial.Length < 4 ? initial : RunAnnealing(m, initial, ct);
         });
     protected override double GetCost(DistanceMatrix m, int[] solution) => m.TourLength(solution);
     protected override int[] Clone(int[] solution) => (int[])solution.Clone();
-    protected override double GetInitialTemperature(DistanceMatrix m, int[] initial, Random rng)
+    protected override double ComputeDefaultInitialTemperature(DistanceMatrix m, int[] initial, Random rng)
     {
         var n = initial.Length; var deltas = new List<double>(); var samples = Math.Min(1000, n * n);
         for (var s = 0; s < samples; s++) { var i = rng.Next(1, n); var k = rng.Next(1, n); if (i == k) continue; if (i > k) (i, k) = (k, i); var a = initial[i==0?n-1:i-1]; var b = initial[i]; var c = initial[k]; var d = initial[(k+1)%n]; if (a == c || b == d) continue; var delta = (m[a,c]+m[b,d])-(m[a,b]+m[c,d]); if (delta > 0) deltas.Add(delta); }

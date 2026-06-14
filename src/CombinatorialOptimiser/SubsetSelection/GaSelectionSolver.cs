@@ -8,8 +8,10 @@ internal sealed class GaSelectionSolver : GeneticAlgorithmBase<SelectionProblem,
     public string Name => "Genetic Algorithm (uniform crossover + repair)";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
 
-    public SelectionResult Solve(SelectionProblem problem) =>
-        SelectionSolverRunner.Timed(Name, Paradigm, problem, () => RunEvolution(problem));
+    public SelectionResult Solve(SelectionProblem problem) => Solve(problem, CancellationToken.None);
+
+    public SelectionResult Solve(SelectionProblem problem, CancellationToken ct) =>
+        SelectionSolverRunner.Timed(Name, Paradigm, problem, () => RunEvolution(problem, ct));
 
     protected override bool[] CreateSeed(SelectionProblem problem, Random rng) => new GreedySelectionSolver().Solve(problem).Selected;
 
@@ -44,7 +46,7 @@ internal sealed class GaSelectionSolver : GeneticAlgorithmBase<SelectionProblem,
 
     protected override bool[] LocalImprove(SelectionProblem problem, bool[] chromosome) => Repair(problem, chromosome);
     protected override bool[] Clone(bool[] chromosome) => (bool[])chromosome.Clone();
-    protected override bool IsDuplicate(List<bool[]> population, bool[] candidate) => population.Any(p => p.SequenceEqual(candidate));
+    protected override bool IsDuplicate(IReadOnlyList<bool[]> population, bool[] candidate) => population.Any(p => p.SequenceEqual(candidate));
 
     // Drops the worst value/cost-ratio selected items until feasible, then greedily fills any remaining capacity.
     private static bool[] Repair(SelectionProblem problem, bool[] chromosome)

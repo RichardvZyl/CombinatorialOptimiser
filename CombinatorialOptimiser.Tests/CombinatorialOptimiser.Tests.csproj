@@ -16,7 +16,9 @@
          This is the standard xUnit naming convention and matches this project's style. -->
     <!-- CA1814: Multidimensional arrays are used in test data (cost matrices, conflict matrices)
          to match the API under test. Switching to jagged arrays would harm test readability. -->
-    <NoWarn>CA5394;CA1707;CA1814</NoWarn>
+    <!-- CA1849: SolveAsync parity tests intentionally call the synchronous Solve alongside
+         SolveAsync to compare their results. -->
+    <NoWarn>CA5394;CA1707;CA1814;CA1849</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CombinatorialOptimiser.csproj" />
+    <ProjectReference Include="..\src\CombinatorialOptimiser\CombinatorialOptimiser.csproj" />
   </ItemGroup>
 
 </Project>

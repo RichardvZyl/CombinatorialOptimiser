@@ -2,65 +2,22 @@ using System.Globalization;
 using CombinatorialOptimiser.Core;
 using CombinatorialOptimiser.Permutation;
 
-ISolver<DistanceMatrix, PermutationResult>[] AllSolvers() => new ISolver<DistanceMatrix, PermutationResult>[]
+ISolver<DistanceMatrix, PermutationResult>[] SolversFor(int n, DistanceMatrix? matrix)
 {
-    new BruteForceSolver(),
-    new BranchAndBoundSolver(),
-    new HeldKarpSolver(),
-    new NearestNeighborSolver(),
-    new ChristofidesSolver { UseExactMatching = true },
-    new ChristofidesSolver { UseExactMatching = false },
-    new TwoOptSolver(),
-    new ThreeOptSolver(),
-    new LinKernighanSolver(),
-    new IteratedLocalSearchSolver(),
-    new SimulatedAnnealingSolver(),
-    new GeneticAlgorithmSolver(),
-};
-
-ISolver<DistanceMatrix, PermutationResult>[] SolversFor(int n, DistanceMatrix? matrix) =>
-    FilterSolvers(n, matrix) switch
-    {
-        { } solvers when n >= 4 && n <= (matrix is not null ? 80 : 80) =>
-            solvers.Concat(ChristofidesSeededVariants(matrix)).ToArray(),
-        var solvers => solvers,
-    };
-
-ISolver<DistanceMatrix, PermutationResult>[] FilterSolvers(int n, DistanceMatrix? matrix)
-{
-    var all = AllSolvers();
-    return n switch
-    {
-        <= 10 => all,
-        <= 16 => all.Where(s => s is not BruteForceSolver).ToArray(),
-        <= 18 => all.Where(s => s is not BruteForceSolver and not BranchAndBoundSolver).ToArray(),
-        <= 40 => all.Where(s => s is not BruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
-        _ => all.Where(s => s is not BruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
-    };
+    var solvers = SolverRegistry.AllPermutationSolvers(n, matrix).ToArray();
+    return solvers;
 }
 
-ISolver<DistanceMatrix, PermutationResult>[] ChristofidesSeededVariants(DistanceMatrix? matrix)
-{
-    if (matrix is null || matrix.Count < 3) return Array.Empty<ISolver<DistanceMatrix, PermutationResult>>();
-    try
-    {
-        var seedSolver = new ChristofidesSolver { UseExactMatching = matrix.Count <= 20 };
-        var seed = seedSolver.Solve(matrix).Order.ToArray();
-        return new ISolver<DistanceMatrix, PermutationResult>[] { new TwoOptSolver { Seed = seed }, new ThreeOptSolver { Seed = seed }, new LinKernighanSolver { Seed = seed }, new IteratedLocalSearchSolver { Seed = seed } };
-    }
-    catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-    {
-        return Array.Empty<ISolver<DistanceMatrix, PermutationResult>>();
-    }
-}
-
-ISolver<DistanceMatrix, PermutationResult> RecommendedFor(int n) => n switch { <= 10 => new BruteForceSolver(), <= 16 => new HeldKarpSolver(), <= 40 => new ChristofidesSolver { UseExactMatching = true }, _ => new LinKernighanSolver() };
+ISolver<DistanceMatrix, PermutationResult> RecommendedFor(int n) =>
+    SolverRegistry.RecommendPermutation(n);
 
 void RunExample(string title, IReadOnlyList<Node> nodes, bool includeExact)
 {
     Console.WriteLine("\n" + new string('=', 75) + "\n" + title + "  (" + nodes.Count.ToString(CultureInfo.InvariantCulture) + " nodes)\n" + new string('=', 75));
     var matrix = new DistanceMatrix(nodes);
-    var solvers = includeExact ? AllSolvers().Concat(ChristofidesSeededVariants(matrix)).ToArray() : SolversFor(nodes.Count, matrix);
+    var solvers = includeExact
+        ? SolverRegistry.AllPermutationSolvers(nodes.Count, matrix).ToArray()
+        : SolversFor(nodes.Count, matrix);
     double? optimal = null;
     var results = new List<PermutationResult>();
     foreach (var solver in solvers) { var r = solver.Solve(matrix); results.Add(r); if (solver is HeldKarpSolver or BruteForceSolver) optimal ??= r.Distance; }
@@ -119,7 +76,8 @@ if (argCities > 0)
 {
     var rng = argSeed >= 0 ? new Random(argSeed) : new Random();
     var nodes = Enumerable.Range(0, argCities).Select(i => new Node("N" + i, rng.Next(0, 1000), rng.Next(0, 1000))).ToArray();
-    var matrix = new DistanceMatrix(nodes); var solvers = FilterByName(SolversFor(argCities, matrix), argSolver);
+    var matrix = new DistanceMatrix(nodes);
+    var solvers = FilterByName(SolversFor(argCities, matrix), argSolver);
     double? optimal = null; var results = new List<PermutationResult>();
     Console.WriteLine("\n=== " + argCities.ToString(CultureInfo.InvariantCulture) + " random nodes" + (argSeed >= 0 ? " (seed " + argSeed.ToString(CultureInfo.InvariantCulture) + ")" : "") + " ===");
     foreach (var solver in solvers) { var r = solver.Solve(matrix); results.Add(r); if (solver is HeldKarpSolver or BruteForceSolver) optimal ??= r.Distance; }

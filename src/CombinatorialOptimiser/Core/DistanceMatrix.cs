@@ -3,12 +3,19 @@ using System.Linq;
 
 namespace CombinatorialOptimiser.Core;
 
+/// <summary>A symmetric pairwise cost matrix over a set of nodes, used to evaluate tours.</summary>
 public class DistanceMatrix
 {
     private readonly double[,] _costs;
+
+    /// <summary>The nodes indexed by this matrix.</summary>
     public IReadOnlyList<Node> Nodes { get; }
+
+    /// <summary>The number of nodes in the matrix.</summary>
     public int Count => Nodes.Count;
 
+    /// <summary>Creates a matrix by computing Euclidean distances between the given nodes' coordinates.</summary>
+    /// <param name="nodes">The nodes to index. Must contain at least one node.</param>
     public DistanceMatrix(IReadOnlyList<Node> nodes)
     {
         ArgumentNullException.ThrowIfNull(nodes);
@@ -17,6 +24,9 @@ public class DistanceMatrix
         for (var i = 0; i < n; i++) { _costs[i, i] = 0; for (var j = i + 1; j < n; j++) _costs[i, j] = _costs[j, i] = nodes[i].DistanceTo(nodes[j]); }
     }
 
+    /// <summary>Creates a matrix from an explicit cost matrix, e.g. for non-Euclidean or asymmetric costs.</summary>
+    /// <param name="rawCosts">An n x n cost matrix matching <paramref name="nodes"/> in size.</param>
+    /// <param name="nodes">The nodes indexed by <paramref name="rawCosts"/>.</param>
     public DistanceMatrix(double[,] rawCosts, IReadOnlyList<Node> nodes)
     {
         ArgumentNullException.ThrowIfNull(rawCosts); ArgumentNullException.ThrowIfNull(nodes);
@@ -25,8 +35,11 @@ public class DistanceMatrix
         Nodes = nodes; _costs = rawCosts;
     }
 
+    /// <summary>Gets the cost of travelling from node <paramref name="from"/> to node <paramref name="to"/>.</summary>
     public double this[int from, int to] => _costs[from, to];
 
+    /// <summary>Computes the total cost of a closed tour that visits nodes in the given order and returns to the start.</summary>
+    /// <param name="order">The visiting order of node indices.</param>
     public double TourLength(IReadOnlyList<int> order)
     {
         ArgumentNullException.ThrowIfNull(order); var total = 0.0;
@@ -34,6 +47,9 @@ public class DistanceMatrix
         return total;
     }
 
+    /// <summary>Creates a matrix from an explicit cost matrix, naming nodes from <paramref name="labels"/> (or by index if none are given).</summary>
+    /// <param name="rawCosts">An n x n cost matrix.</param>
+    /// <param name="labels">Optional node names; if empty, nodes are named "0", "1", etc.</param>
     public static DistanceMatrix FromLabels(double[,] rawCosts, params string[] labels)
     {
         ArgumentNullException.ThrowIfNull(rawCosts);
