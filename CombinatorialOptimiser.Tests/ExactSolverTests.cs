@@ -13,12 +13,27 @@ public class ExactSolverTests
         new Node("NW", 0, 1),
     ];
 
-    [Fact]
-    public void UnitSquare_OptimalIsPerimeter()
+    public static TheoryData<ISolver<DistanceMatrix, PermutationResult>> BruteForceSolvers =>
+        new() { new BruteForceSolver(), new RecursiveBruteForceSolver() };
+
+    [Theory]
+    [MemberData(nameof(BruteForceSolvers))]
+    public void UnitSquare_OptimalIsPerimeter(ISolver<DistanceMatrix, PermutationResult> solver)
     {
+        ArgumentNullException.ThrowIfNull(solver);
         var matrix = new DistanceMatrix(UnitSquare);
-        var result = new BruteForceSolver().Solve(matrix);
-        Assert.Equal(4.0, result.Distance, precision: 6);
+        Assert.Equal(4.0, solver.Solve(matrix).Distance, precision: 6);
+    }
+
+    [Theory]
+    [InlineData(4, 7)]
+    [InlineData(5, 13)]
+    public void BothBruteForce_SmallRandom_AgreeOnOptimal(int n, int seed)
+    {
+        var matrix = new DistanceMatrix(TestHelpers.MakeSeededNodes(n, seed));
+        var heapDist = new BruteForceSolver().Solve(matrix).Distance;
+        var recursiveDist = new RecursiveBruteForceSolver().Solve(matrix).Distance;
+        Assert.Equal(heapDist, recursiveDist, precision: 6);
     }
 
     [Fact]

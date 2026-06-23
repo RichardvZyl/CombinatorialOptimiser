@@ -13,6 +13,7 @@ internal sealed class BnBSelectionSolver : ISolver<SelectionProblem, SelectionRe
     private static bool[] SolveImpl(SelectionProblem problem)
     {
         var n = problem.Items.Count;
+        if (n > 60) throw new InvalidOperationException($"Branch and Bound requires n ≤ 60 (got {n}). Use GreedySelectionSolver for larger inputs.");
         var capacity = problem.Capacity;
 
         // Sort by value/cost ratio descending: gives the tightest fractional-knapsack bound.

@@ -2,6 +2,9 @@ using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Greedy construction heuristic: starting at node 0, always extend the partial tour to
+// the nearest unvisited node. Runs in O(n²) and produces a fast, reasonable starting
+// tour, though early greedy choices can foreclose shorter global paths.
 internal sealed class NearestNeighborSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Nearest Neighbor (greedy)";

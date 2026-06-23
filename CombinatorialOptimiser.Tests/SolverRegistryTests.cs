@@ -45,6 +45,7 @@ public class SolverRegistryTests
     {
         var solvers = SolverRegistry.AllPermutationSolvers(8);
         Assert.Contains(solvers, s => s is BruteForceSolver);
+        Assert.Contains(solvers, s => s is RecursiveBruteForceSolver);
         Assert.Contains(solvers, s => s is HeldKarpSolver);
     }
 
@@ -53,6 +54,7 @@ public class SolverRegistryTests
     {
         var solvers = SolverRegistry.AllPermutationSolvers(25);
         Assert.DoesNotContain(solvers, s => s is BruteForceSolver);
+        Assert.DoesNotContain(solvers, s => s is RecursiveBruteForceSolver);
         Assert.DoesNotContain(solvers, s => s is BranchAndBoundSolver);
         Assert.DoesNotContain(solvers, s => s is HeldKarpSolver);
         Assert.DoesNotContain(solvers, s => s is ChristofidesSolver { UseExactMatching: true });

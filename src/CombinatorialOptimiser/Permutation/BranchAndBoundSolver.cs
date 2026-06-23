@@ -2,12 +2,15 @@ using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Exact depth-first branch-and-bound. Seeds an upper bound from Nearest Neighbor then
+// prunes branches whose partial cost plus a lower bound (half the sum of two cheapest
+// edges per unvisited node) cannot beat the incumbent. Requires n < 31; often faster
+// than Held-Karp in practice due to aggressive pruning on structured instances.
 internal sealed class BranchAndBoundSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Branch and Bound (exact)";
     public SolverParadigm Paradigm => SolverParadigm.Exact;
     public PermutationResult Solve(DistanceMatrix m) => SolverRunner.Timed(Name, Paradigm, m, () => SolveImpl(m));
-    // TODO: migrate to BranchAndBoundBase once a second exact-search domain (e.g. BnBSelectionSolver) defines the right abstraction
     private static int[] SolveImpl(DistanceMatrix m)
     {
         var n = m.Count; if (n >= 31) throw new InvalidOperationException("Branch and Bound requires n < 31 (got " + n + ").");

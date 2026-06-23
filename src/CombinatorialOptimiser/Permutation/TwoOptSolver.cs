@@ -3,6 +3,9 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Local search improvement: scans all pairs of edges and reverses the segment between
+// them whenever doing so reduces tour length. Repeats until no improving swap exists
+// (2-opt local optimum). Seeds from Nearest Neighbor unless an external seed is provided.
 internal sealed class TwoOptSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "2-opt (local search)";

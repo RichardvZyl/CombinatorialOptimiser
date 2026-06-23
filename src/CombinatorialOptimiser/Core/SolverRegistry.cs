@@ -39,9 +39,9 @@ public static class SolverRegistry
         var filtered = nodeCount switch
         {
             <= 10 => all,
-            <= 16 => all.Where(s => s is not BruteForceSolver).ToArray(),
-            <= 18 => all.Where(s => s is not BruteForceSolver and not BranchAndBoundSolver).ToArray(),
-            _ => all.Where(s => s is not BruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
+            <= 16 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver).ToArray(),
+            <= 18 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver).ToArray(),
+            _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
         };
 
         return nodeCount >= 4 && matrix is not null
@@ -52,6 +52,7 @@ public static class SolverRegistry
     private static ISolver<DistanceMatrix, PermutationResult>[] AllSolvers() =>
     [
         new BruteForceSolver(),
+        new RecursiveBruteForceSolver(),
         new BranchAndBoundSolver(),
         new HeldKarpSolver(),
         new NearestNeighborSolver(),

@@ -2,6 +2,9 @@ using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Reduction algorithm with a 1.5× optimality guarantee on metric instances. Builds a
+// minimum spanning tree, finds minimum-weight perfect matching on its odd-degree vertices,
+// combines them into an Eulerian multigraph, then shortcuts repeated nodes to a Hamiltonian tour.
 internal sealed class ChristofidesSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public bool UseExactMatching { get; init; } = true;

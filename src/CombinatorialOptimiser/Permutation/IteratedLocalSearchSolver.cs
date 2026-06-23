@@ -3,6 +3,10 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Metaheuristic: alternates between Lin-Kernighan local search and a double-bridge
+// perturbation (a 4-opt kick that splits the tour into four segments and reassembles them
+// in a new order). Accepts only improvements after each perturbation, balancing
+// intensification with escape from local optima.
 internal sealed class IteratedLocalSearchSolver : IteratedLocalSearchBase<DistanceMatrix, int[]>, ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Iterated Local Search (LK + double-bridge)";

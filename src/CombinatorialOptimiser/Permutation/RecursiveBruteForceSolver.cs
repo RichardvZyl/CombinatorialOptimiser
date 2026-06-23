@@ -2,14 +2,15 @@ using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
-// Exact solver: enumerates all (n-1)! permutations via Heap's iterative algorithm and
-// returns the shortest tour. O(n!) — only viable for n ≤ 12. Uses a single iterator
-// state machine throughout, avoiding the nested allocations of the recursive variant.
-internal sealed class BruteForceSolver : ISolver<DistanceMatrix, PermutationResult>
+// Exact solver: enumerates all (n-1)! permutations via swap-based recursive backtracking
+// and returns the shortest tour. O(n!) — only viable for n ≤ 12. The swap/recurse/unswap
+// structure is easier to verify by inspection than Heap's algorithm but allocates one
+// iterator state machine per recursion depth.
+internal sealed class RecursiveBruteForceSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     private static readonly int[] _singleZero = [0];
 
-    public string Name => "Brute Force – Heap's (exact)";
+    public string Name => "Brute Force – Recursive (exact)";
     public SolverParadigm Paradigm => SolverParadigm.Exact;
 
     public PermutationResult Solve(DistanceMatrix m) =>
@@ -24,7 +25,7 @@ internal sealed class BruteForceSolver : ISolver<DistanceMatrix, PermutationResu
             int[] best = null!;
             var bestCost = double.PositiveInfinity;
 
-            foreach (var perm in Permute(remaining))
+            foreach (var perm in Permute(remaining, 0))
             {
                 Array.Copy(perm, 0, order, 1, perm.Length);
                 var cost = m.TourLength(order);
@@ -37,29 +38,14 @@ internal sealed class BruteForceSolver : ISolver<DistanceMatrix, PermutationResu
             return best;
         });
 
-    private static IEnumerable<int[]> Permute(int[] a)
+    private static IEnumerable<int[]> Permute(int[] a, int start)
     {
-        // Heap's non-recursive algorithm to generate all permutations.
-        var n = a.Length;
-        var c = new int[n];
-        yield return (int[])a.Clone();
-
-        var i = 0;
-        while (i < n)
+        if (start >= a.Length) { yield return (int[])a.Clone(); yield break; }
+        for (var i = start; i < a.Length; i++)
         {
-            if (c[i] < i)
-            {
-                var swapIndex = i % 2 == 0 ? 0 : c[i];
-                (a[swapIndex], a[i]) = (a[i], a[swapIndex]);
-                yield return (int[])a.Clone();
-                c[i]++;
-                i = 0;
-            }
-            else
-            {
-                c[i] = 0;
-                i++;
-            }
+            (a[start], a[i]) = (a[i], a[start]);
+            foreach (var p in Permute(a, start + 1)) yield return p;
+            (a[start], a[i]) = (a[i], a[start]);
         }
     }
 }

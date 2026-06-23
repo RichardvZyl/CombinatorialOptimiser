@@ -3,6 +3,9 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Population-based metaheuristic using Edge Recombination Crossover (ERX) to inherit
+// shared edges from both parents, double-bridge mutation for diversity, and Lin-Kernighan
+// local search on each offspring. Duplicates are suppressed to maintain population variety.
 internal sealed class GeneticAlgorithmSolver : GeneticAlgorithmBase<DistanceMatrix, int[]>, ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Genetic Algorithm (ERX + LK)";

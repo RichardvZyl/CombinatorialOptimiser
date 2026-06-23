@@ -3,6 +3,9 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Local search improvement that considers all triples of edges simultaneously, testing all
+// valid reconnection patterns including the pure 3-opt double-reversal move. Stronger than
+// 2-opt but O(n³) per pass. Seeds from Nearest Neighbor unless an external seed is provided.
 internal sealed class ThreeOptSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "3-opt (local search)";

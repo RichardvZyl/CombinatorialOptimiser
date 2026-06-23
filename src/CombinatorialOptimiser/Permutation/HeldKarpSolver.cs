@@ -2,6 +2,9 @@ using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Exact dynamic programming solver using bitmask subset enumeration. Fills a dp[mask][last]
+// table over all (visited-set, endpoint) pairs in O(2^n · n²) time — exponential but far
+// better than O(n!) brute force. Requires n < 31 (bitmask size); practical up to n ≈ 20.
 internal sealed class HeldKarpSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Held-Karp DP (exact)";

@@ -3,6 +3,10 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.Permutation;
 
+// Metaheuristic: starts from a Nearest Neighbor tour and applies random 2-opt moves,
+// always accepting improvements and accepting worsening moves with probability e^(−Δ/T).
+// Temperature is calibrated from sampled cost deltas and decayed each iteration, allowing
+// escape from local optima that trap pure local search.
 internal sealed class SimulatedAnnealingSolver : SimulatedAnnealingBase<DistanceMatrix, int[]>, ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Simulated Annealing";
