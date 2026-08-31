@@ -19,8 +19,10 @@ public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
     /// <summary>Algorithmic paradigm.</summary>
     public SolverParadigm Paradigm => SolverParadigm.Construction;
 
+    /// <summary>Base policy used for rollouts (defaults to nearest-neighbour).</summary>
     public ISolver<DistanceMatrix, PermutationResult> BasePolicy { get; init; } = new NearestNeighborSolver();
 
+    /// <summary>Synchronous solve entrypoint.</summary>
     public PermutationResult Solve(DistanceMatrix matrix) => SolverRunner.Timed(Name, Paradigm, matrix, () => SolveInternal(matrix));
 
     private int[] SolveInternal(DistanceMatrix matrix)
@@ -55,7 +57,7 @@ public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
         return order.ToArray();
     }
 
-    private DistanceMatrix SimulateWithPrefix(DistanceMatrix original, int[] prefix)
+    private static DistanceMatrix SimulateWithPrefix(DistanceMatrix original, int[] prefix)
     {
         // For tests we just return the original; a real implementation would create a modified view
         // where the prefix is fixed and the remainder is the subproblem.
