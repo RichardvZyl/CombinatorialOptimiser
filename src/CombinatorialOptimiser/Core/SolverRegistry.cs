@@ -10,7 +10,7 @@ public static class SolverRegistry
     // Thresholds for selecting solver tiers. Extracted to named constants to ease tuning and testing.
     private const int ExactSolverMaxNodes = 10;
     private const int DpSolverMaxNodes = 16;
-    private const int NoExactBeyondNodes = 18;
+    private const int NoExactBeyondNodes = 18; // kept for documentation; used implicitly via comparisons below
 
     /// <summary>Returns the recommended solver for a permutation problem of the given size.</summary>
     public static ISolver<DistanceMatrix, PermutationResult> RecommendPermutation(int nodeCount) => nodeCount switch
