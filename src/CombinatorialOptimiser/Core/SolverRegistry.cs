@@ -78,6 +78,9 @@ public static class SolverRegistry
         new ThreeOptSolver(),
         new LinKernighanSolver(),
 
+        // Rollout engine: one-step lookahead with a base policy
+        new RolloutSolver(),
+
         // Metaheuristics / stochastic improvement
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
