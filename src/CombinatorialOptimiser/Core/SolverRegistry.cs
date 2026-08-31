@@ -109,8 +109,12 @@ public static class SolverRegistry
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
+<<<<<<< HEAD
         // Ant Colony Optimization (pheromone-based stochastic search)
         new AntColonySolver(),
+=======
+        new GnnPolicySolver(), // learned GNN policy (ONNX); falls back to cheap heuristic when model unavailable
+>>>>>>> 66400d9 (feat(gnn-policy): add GnnPolicySolver stub + tests; register in registry)
     ];
 
     /// <summary>
