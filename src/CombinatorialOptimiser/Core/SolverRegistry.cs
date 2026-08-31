@@ -89,6 +89,7 @@ public static class SolverRegistry
         // Useful as an LLM-style decoder analogue (beam, temperature) and as a tunable
         // compromise between greedy and exhaustive search.
         new BeamSearchSolver(),
+        new DiverseBeamSolver(),            // Beam variant that encourages diversity across beam members
         // Monte Carlo Tree Search (MCTS) - simulation based search useful for planning-style tasks
         new MctsSolver(),
 
