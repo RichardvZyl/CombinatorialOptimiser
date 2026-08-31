@@ -13,9 +13,17 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <summary>Human-readable name.</summary>
+    public string Name => "Rollout (one-step lookahead)";
+
+    /// <summary>Algorithmic paradigm.</summary>
+    public SolverParadigm Paradigm => SolverParadigm.Construction;
+
     public ISolver<DistanceMatrix, PermutationResult> BasePolicy { get; init; } = new NearestNeighborSolver();
 
-    public PermutationResult Solve(DistanceMatrix matrix)
+    public PermutationResult Solve(DistanceMatrix matrix) => SolverRunner.Timed(Name, Paradigm, matrix, () => SolveInternal(matrix));
+
+    private int[] SolveInternal(DistanceMatrix matrix)
     {
         var n = matrix.Count;
         var order = new List<int>();
@@ -32,7 +40,7 @@ public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
                 // build a matrix with prefix fixed by setting huge costs for prefix transitions to force construction
                 var simulated = SimulateWithPrefix(matrix, prefix);
                 var res = BasePolicy.Solve(simulated);
-                var cost = res.Cost + matrix.TourCost(order.Concat(new[] { c }).ToArray());
+                var cost = res.Distance + matrix.TourLength(order.Concat(new[] { c }).ToArray());
                 if (cost < bestCost)
                 {
                     bestCost = cost;
@@ -44,7 +52,7 @@ public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
             used.Add(best);
         }
 
-        return new PermutationResult(order.ToArray(), matrix.TourCost(order.ToArray()));
+        return order.ToArray();
     }
 
     private DistanceMatrix SimulateWithPrefix(DistanceMatrix original, int[] prefix)
