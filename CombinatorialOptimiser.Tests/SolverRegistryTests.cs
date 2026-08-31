@@ -77,11 +77,14 @@ public class SolverRegistryTests
         // The constants are private; assert behaviour around boundaries to ensure they are applied
         var beforeExact = SolverRegistry.RecommendPermutation(10);
         var atDp = SolverRegistry.RecommendPermutation(16);
-        var pastNoExact = SolverRegistry.RecommendPermutation(19);
+        var nineteen = SolverRegistry.RecommendPermutation(19);
+        var fortyOne = SolverRegistry.RecommendPermutation(41);
 
         Assert.IsType<BruteForceSolver>(beforeExact);
         Assert.IsType<HeldKarpSolver>(atDp);
-        Assert.IsType<LinKernighanSolver>(pastNoExact);
+        // 19 should still pick Christofides (threshold for LinKernighan is >40)
+        Assert.IsType<ChristofidesSolver>(nineteen);
+        Assert.IsType<LinKernighanSolver>(fortyOne);
     }
 
     [Fact]
