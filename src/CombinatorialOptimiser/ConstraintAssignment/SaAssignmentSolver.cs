@@ -3,7 +3,7 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.ConstraintAssignment;
 
-internal sealed class SaAssignmentSolver : SimulatedAnnealingBase<AssignmentProblem, int[]>, ISolver<AssignmentProblem, AssignmentResult>
+internal sealed class SaAssignmentSolver : SimulatedAnnealing<AssignmentProblem, int[]>, ISolver<AssignmentProblem, AssignmentResult>
 {
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;

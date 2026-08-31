@@ -3,7 +3,7 @@ namespace CombinatorialOptimiser.Core.Metaheuristics;
 /// <summary>Shared simulated annealing loop. Domains subclass this and supply cost evaluation, the move/acceptance step, and cloning.</summary>
 /// <typeparam name="TProblem">The problem instance type.</typeparam>
 /// <typeparam name="TSolution">The candidate solution type.</typeparam>
-public abstract class SimulatedAnnealingBase<TProblem, TSolution>
+public abstract class SimulatedAnnealing<TProblem, TSolution>
 {
     /// <summary>The starting temperature. If <c>null</c>, <see cref="ComputeDefaultInitialTemperature"/> is used.</summary>
     public double? InitialTemperature { get; init; }

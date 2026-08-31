@@ -3,7 +3,7 @@ namespace CombinatorialOptimiser.Core.Metaheuristics;
 /// <summary>Shared genetic algorithm loop. Domains subclass this and supply chromosome creation, fitness, crossover, mutation, and repair.</summary>
 /// <typeparam name="TProblem">The problem instance type.</typeparam>
 /// <typeparam name="TChromosome">The chromosome (candidate solution) type.</typeparam>
-public abstract class GeneticAlgorithmBase<TProblem, TChromosome>
+public abstract class GeneticAlgorithm<TProblem, TChromosome>
 {
     /// <summary>The number of chromosomes maintained in each generation.</summary>
     public int PopulationSize { get; init; } = 20;

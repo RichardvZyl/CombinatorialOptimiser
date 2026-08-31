@@ -3,7 +3,7 @@ namespace CombinatorialOptimiser.Core.Metaheuristics;
 /// <summary>Shared iterated local search loop. Domains subclass this and supply local search, perturbation, and evaluation.</summary>
 /// <typeparam name="TProblem">The problem instance type.</typeparam>
 /// <typeparam name="TSolution">The candidate solution type.</typeparam>
-public abstract class IteratedLocalSearchBase<TProblem, TSolution>
+public abstract class IteratedLocalSearch<TProblem, TSolution>
 {
     /// <summary>The number of perturb-and-reoptimise iterations to run.</summary>
     public int MaxIterations { get; init; } = 20;

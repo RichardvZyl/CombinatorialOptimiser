@@ -24,7 +24,7 @@ algorithms serve scheduling, routing, wiring, etc.
 
 ```
 src/CombinatorialOptimiser/        # the LIBRARY (OutputType=Library, packable NuGet)
-├── Core/                          # ISolver<TProblem,TResult>, ISolverBase, SolverResult, Node, DistanceMatrix, SolverRegistry
+├── Core/                          # ISolver<TProblem,TResult>, ISolver, SolverResult, Node, DistanceMatrix, SolverRegistry
 │   └── Metaheuristics/            # shared SA / GA / ILS base classes (domains subclass these)
 ├── Permutation/                   # 11 TSP solvers
 ├── SubsetSelection/               # 5 knapsack solvers
@@ -40,7 +40,7 @@ CombinatorialOptimiser.Tests/      # xUnit (~62+ tests)
   domain: `ISolver<DistanceMatrix, PermutationResult>`,
   `ISolver<SelectionProblem, SelectionResult>`,
   `ISolver<AssignmentProblem, AssignmentResult>`.
-- `ISolverBase` is the non-generic marker (`Name`, `Paradigm`) for cross-domain
+- `ISolver` is the non-generic marker (`Name`, `Paradigm`) for cross-domain
   collections; `SolverParadigm` enum classifies algorithms.
 - `Core/SolverRegistry.cs` recommends/filters solvers by problem size and builds
   Christofides-seeded local-search variants.

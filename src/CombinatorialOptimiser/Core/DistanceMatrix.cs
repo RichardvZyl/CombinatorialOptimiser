@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 
 namespace CombinatorialOptimiser.Core;
@@ -37,6 +36,59 @@ public class DistanceMatrix
 
     /// <summary>Gets the cost of travelling from node <paramref name="from"/> to node <paramref name="to"/>.</summary>
     public double this[int from, int to] => _costs[from, to];
+
+    /// <summary>
+    /// Computes row-wise log-probabilities for transitions using a softmax over -cost/temperature.
+    /// Each row corresponds to probabilities conditioned on the current node.
+    /// If <paramref name="disallowSelf"/> is true, self-transitions are given a large negative log-probability.
+    /// </summary>
+    public double[,] TransitionLogProbabilities(double temperature = 1.0, bool disallowSelf = true)
+    {
+        if (temperature <= 0) throw new ArgumentOutOfRangeException(nameof(temperature), "Temperature must be positive.");
+        var n = Count;
+        var logProbs = new double[n, n];
+        for (var i = 0; i < n; i++)
+        {
+            // Build scores = -cost / temperature
+            var max = double.NegativeInfinity;
+            for (var j = 0; j < n; j++)
+            {
+                if (disallowSelf && i == j) continue;
+                var s = -_costs[i, j] / temperature;
+                if (s > max) max = s;
+            }
+
+            // If all transitions were disallowed (shouldn't happen), leave zeros
+            if (double.IsNegativeInfinity(max))
+            {
+                for (var j = 0; j < n; j++) logProbs[i, j] = double.NegativeInfinity;
+                continue;
+            }
+
+            // Compute normalized log-probs in a numerically stable way: log softmax(s)
+            var sumExp = 0.0;
+            for (var j = 0; j < n; j++)
+            {
+                if (disallowSelf && i == j) continue;
+                sumExp += Math.Exp((-_costs[i, j] / temperature) - max);
+            }
+            var logSumExp = Math.Log(sumExp) + max;
+
+            for (var j = 0; j < n; j++)
+            {
+                if (disallowSelf && i == j)
+                {
+                    logProbs[i, j] = double.NegativeInfinity;
+                }
+                else
+                {
+                    var s = -_costs[i, j] / temperature;
+                    logProbs[i, j] = s - logSumExp;
+                }
+            }
+        }
+        return logProbs;
+    }
 
     /// <summary>Computes the total cost of a closed tour that visits nodes in the given order and returns to the start.</summary>
     /// <param name="order">The visiting order of node indices.</param>

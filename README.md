@@ -12,6 +12,9 @@ Construction, Improvement, Reduction).
 dotnet run --project CombinatorialOptimiser.Cli -c Release                         # interactive prompt + demos
 dotnet run --project CombinatorialOptimiser.Cli -c Release -- --cities 10          # 10 random cities, all solvers
 dotnet run --project CombinatorialOptimiser.Cli -c Release -- --cities 8 --solver HeldKarp  # single solver
+# Enable BeamSearch via CLI flags (examples):
+dotnet run --project CombinatorialOptimiser.Cli -c Release -- --beam-width 8 --beam-temp 0.5 --beam-rank tour
+dotnet run --project CombinatorialOptimiser.Cli -c Release -- --solver BeamSearch  # select by name/type
 ```
 
 ## Using the library
@@ -44,7 +47,7 @@ dotnet test CombinatorialOptimiser.slnx -c Release
 ```
 CombinatorialOptimiser.slnx
 ├── src/CombinatorialOptimiser/    # the LIBRARY (packable NuGet project)
-│   ├── Core/                       # ISolver<TProblem,TResult>, SolverResultBase, Node, DistanceMatrix, SolverRegistry
+│   ├── Core/                       # ISolver<TProblem,TResult>, SolverResult, Node, DistanceMatrix, SolverRegistry
 │   │   └── Metaheuristics/          # shared SA / GA / ILS base classes
 │   ├── Permutation/                # 11 solver implementations (TSP-style)
 │   ├── SubsetSelection/             # 0/1 knapsack: 5 solvers
@@ -68,6 +71,17 @@ CombinatorialOptimiser.slnx
 | ILS | Meta-heuristic | O(iter * n^2) | Best of many local optima |
 | Simulated Annealing | Meta-heuristic | O(steps) | Probabilistic global |
 | Genetic Algorithm | Meta-heuristic | O(gen * pop * n^2) | Population diversity |
+
+| Beam Search | Construction (heuristic) | O(beam * n^2) typical | Heuristic (improves with beam/temperature) |
+
+## Per-solver documentation
+
+Detailed per-solver docs live under docs/solvers. A template and a small helper script are provided to create new solver docs:
+
+- docs/solvers/TEMPLATE.md
+- tools/create-solver-doc.ps1
+
+Example: tools/create-solver-doc.ps1 -Name MyNewSolver
 
 ## The 5 SubsetSelection solvers
 

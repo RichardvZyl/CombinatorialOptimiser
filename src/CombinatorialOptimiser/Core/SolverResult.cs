@@ -19,7 +19,7 @@ public enum SolverParadigm
 }
 
 /// <summary>Common identity shared by all solvers, independent of problem/result types.</summary>
-public interface ISolverBase
+public interface ISolver
 {
     /// <summary>A human-readable name for the algorithm.</summary>
     string Name { get; }
@@ -30,8 +30,8 @@ public interface ISolverBase
 
 /// <summary>A solver that maps a problem instance of type <typeparamref name="TProblem"/> to a result of type <typeparamref name="TResult"/>.</summary>
 /// <typeparam name="TProblem">The problem instance type.</typeparam>
-/// <typeparam name="TResult">The result type, derived from <see cref="SolverResultBase"/>.</typeparam>
-public interface ISolver<TProblem, TResult> : ISolverBase where TResult : SolverResultBase
+/// <typeparam name="TResult">The result type, derived from <see cref="SolverResult"/>.</typeparam>
+public interface ISolver<TProblem, TResult> : ISolver where TResult : SolverResult
 {
     /// <summary>Solves the given problem instance synchronously.</summary>
     TResult Solve(TProblem problem);
@@ -52,7 +52,7 @@ public interface ISolver<TProblem, TResult> : ISolverBase where TResult : Solver
 /// <param name="Algorithm">The name of the algorithm that produced this result.</param>
 /// <param name="Paradigm">The algorithmic category the solver belongs to.</param>
 /// <param name="Elapsed">The wall-clock time taken to produce the result.</param>
-public abstract record SolverResultBase(string Algorithm, SolverParadigm Paradigm, TimeSpan Elapsed);
+public abstract record SolverResult(string Algorithm, SolverParadigm Paradigm, TimeSpan Elapsed);
 
 /// <summary>The result of solving a permutation (TSP-style) problem.</summary>
 /// <param name="Algorithm">The name of the algorithm that produced this result.</param>
@@ -61,7 +61,7 @@ public abstract record SolverResultBase(string Algorithm, SolverParadigm Paradig
 /// <param name="Distance">The total tour distance for <paramref name="Order"/>.</param>
 /// <param name="Elapsed">The wall-clock time taken to produce the result.</param>
 public sealed record PermutationResult(string Algorithm, SolverParadigm Paradigm, IReadOnlyList<int> Order, double Distance, TimeSpan Elapsed)
-    : SolverResultBase(Algorithm, Paradigm, Elapsed)
+    : SolverResult(Algorithm, Paradigm, Elapsed)
 {
     /// <summary>Renders the tour as a human-readable "A -> B -> ... -> A" route description.</summary>
     /// <param name="nodes">The nodes referenced by <see cref="Order"/>.</param>

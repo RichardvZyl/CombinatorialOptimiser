@@ -7,7 +7,7 @@ namespace CombinatorialOptimiser.Permutation;
 // always accepting improvements and accepting worsening moves with probability e^(−Δ/T).
 // Temperature is calibrated from sampled cost deltas and decayed each iteration, allowing
 // escape from local optima that trap pure local search.
-internal sealed class SimulatedAnnealingSolver : SimulatedAnnealingBase<DistanceMatrix, int[]>, ISolver<DistanceMatrix, PermutationResult>
+internal sealed class SimulatedAnnealingSolver : SimulatedAnnealing<DistanceMatrix, int[]>, ISolver<DistanceMatrix, PermutationResult>
 {
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;

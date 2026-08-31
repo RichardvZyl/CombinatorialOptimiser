@@ -14,7 +14,7 @@ namespace CombinatorialOptimiser.SubsetSelection;
 #pragma warning disable CA1819 // Selected array is a core solver output; switching to IReadOnlyList would break all solver and test code.
 public sealed record SelectionResult(string Algorithm, SolverParadigm Paradigm, bool[] Selected, double TotalValue, double TotalCost, TimeSpan Elapsed)
 #pragma warning restore CA1819
-    : SolverResultBase(Algorithm, Paradigm, Elapsed)
+    : SolverResult(Algorithm, Paradigm, Elapsed)
 {
     /// <summary>Renders the selected items as a human-readable summary including total value and cost.</summary>
     /// <param name="items">The items referenced by <see cref="Selected"/>.</param>

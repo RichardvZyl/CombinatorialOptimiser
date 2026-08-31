@@ -3,7 +3,7 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.SubsetSelection;
 
-internal sealed class GaSelectionSolver : GeneticAlgorithmBase<SelectionProblem, bool[]>, ISolver<SelectionProblem, SelectionResult>
+internal sealed class GaSelectionSolver : GeneticAlgorithm<SelectionProblem, bool[]>, ISolver<SelectionProblem, SelectionResult>
 {
     public string Name => "Genetic Algorithm (uniform crossover + repair)";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
