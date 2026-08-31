@@ -39,9 +39,14 @@ public static class SolverRegistry
         var filtered = nodeCount switch
         {
             <= 10 => all,
-            <= 16 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver).ToArray(),
-            <= 18 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver).ToArray(),
-            _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
+            // For moderate sizes we exclude brute-force variants and also branch-and-bound
+            // which tends to perform poorly beyond tiny n. Heavier exact solvers (Held-Karp)
+            // remain available in this tier.
+            <= 16 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver).ToArray(),
+            // For slightly larger instances avoid exact exponential solvers; allow heuristics and metaheuristics.
+            <= 18 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver).ToArray(),
+            // Very large instances: exclude heavy exact/reduction methods and keep constructive and metaheuristic solvers only.
+            _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true } and not ChristofidesSolver { UseExactMatching: false }).ToArray(),
         };
 
         return nodeCount >= 4 && matrix is not null

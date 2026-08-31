@@ -49,6 +49,17 @@ public class SolverRegistryTests
         Assert.Contains(solvers, s => s is HeldKarpSolver);
     }
 
+    [Theory]
+    [InlineData(5, typeof(BruteForceSolver))]
+    [InlineData(11, typeof(HeldKarpSolver))]
+    [InlineData(17, typeof(NearestNeighborSolver))]
+    [InlineData(50, typeof(IteratedLocalSearchSolver))]
+    public void AllPermutationSolvers_ReturnsRepresentativeSolverTypes(int nodeCount, Type expectedRepresentative)
+    {
+        var solvers = SolverRegistry.AllPermutationSolvers(nodeCount, matrix: null);
+        Assert.Contains(solvers, s => expectedRepresentative.IsInstanceOfType(s));
+    }
+
     [Fact]
     public void AllPermutationSolvers_LargeProblem_ExcludesExpensiveExactSolvers()
     {
