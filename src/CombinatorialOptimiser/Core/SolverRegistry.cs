@@ -112,6 +112,7 @@ public static class SolverRegistry
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
         new GnnPolicySolver(),             // learned GNN policy (ONNX); falls back to cheap heuristic when model unavailable
+        new VnsSolver(),                   // Variable neighborhood search (2-/3-opt neighborhoods)
         // Ant Colony Optimization (pheromone-based stochastic search)
         new AntColonySolver(),
     ];
