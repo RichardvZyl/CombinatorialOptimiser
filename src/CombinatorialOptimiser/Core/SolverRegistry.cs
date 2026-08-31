@@ -49,23 +49,49 @@ public static class SolverRegistry
             : filtered;
     }
 
+    // Canonical list of available permutation solvers. Each entry below is intentionally
+    // short-described so readers and tooling understand the purpose and tradeoffs.
+    // When adding a new solver, also add a docs/solvers/<SolverName>.md file describing
+    // complexity, parameters and typical use cases (a template exists at docs/solvers/TEMPLATE.md).
     private static ISolver<DistanceMatrix, PermutationResult>[] AllSolvers() =>
     [
-        new BruteForceSolver(),
-        new RecursiveBruteForceSolver(),
-        new BranchAndBoundSolver(),
-        new HeldKarpSolver(),
-        new NearestNeighborSolver(),
+        // Exact solvers (guarantee optimality; exponential cost)
+        new BruteForceSolver(),            // exhaustive enumeration, small n only
+        new RecursiveBruteForceSolver(),   // recursive variant of brute force
+        new BranchAndBoundSolver(),        // pruned exact search using bounds
+        new HeldKarpSolver(),              // DP exact solver (2^n * n^2)
+
+        // Fast constructive heuristics (cheap, often used as seeds)
+        new NearestNeighborSolver(),       // greedy nearest unvisited
+
+        // Beam search: heuristic constructive strategy guided by transition log-probabilities
+        // Useful as an LLM-style decoder analogue (beam, temperature) and as a tunable
+        // compromise between greedy and exhaustive search.
+        new BeamSearchSolver(),
+
+        // Approximation / reduction
         new ChristofidesSolver { UseExactMatching = true },
         new ChristofidesSolver { UseExactMatching = false },
+
+        // Local improvement heuristics
         new TwoOptSolver(),
         new ThreeOptSolver(),
         new LinKernighanSolver(),
+
+        // Metaheuristics / stochastic improvement
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
     ];
 
+    /// <summary>
+    /// Produce solver variants seeded from a Christofides tour.
+    /// Runs Christofides (uses exact matching when matrix.Count is 20 or less) to obtain a seed tour,
+    /// then returns improvement solvers (TwoOpt, ThreeOpt, LinKernighan, IteratedLocalSearch)
+    /// with their <c>Seed</c> property set to that tour. If seeding fails due to an
+    /// invalid or degenerate matrix, the method returns an empty array so callers can
+    /// continue without the seeded variants.
+    /// </summary>
     private static ISolver<DistanceMatrix, PermutationResult>[] ChristofidesSeededVariants(DistanceMatrix matrix)
     {
         try

@@ -20,22 +20,22 @@ combinatorial optimisation problems across three domains:
 specialised per domain (`ISolver<DistanceMatrix, PermutationResult>`,
 `ISolver<SelectionProblem, SelectionResult>`,
 `ISolver<AssignmentProblem, AssignmentResult>`). The CLI's `Program.cs`
-dispatches across the Permutation solvers via the non-generic `ISolverBase`
+dispatches across the Permutation solvers via the non-generic `ISolver`
 marker, and `SolverRegistry` recommends/enumerates solvers by problem size.
 Solvers are classified by the shared `SolverParadigm` enum.
 
 Shared metaheuristic scaffolding lives in `Core/Metaheuristics/`:
-`SimulatedAnnealingBase<TProblem, TSolution>`,
-`GeneticAlgorithmBase<TProblem, TChromosome>`, and
-`IteratedLocalSearchBase<TProblem, TSolution>` implement the
+`SimulatedAnnealing<TProblem, TSolution>`,
+`GeneticAlgorithm<TProblem, TChromosome>`, and
+`IteratedLocalSearch<TProblem, TSolution>` implement the
 temperature/population/perturbation loops; each domain's SA/GA/ILS solvers are
 thin subclasses that supply the domain-specific moves and objective.
 
 ## Key Abstractions
-- **ISolverBase**: Non-generic marker (`Name`, `Paradigm`) for cross-domain collections
+- **ISolver**: Non-generic marker (`Name`, `Paradigm`) for cross-domain collections
 - **ISolver\<TProblem, TResult\>**: `Solve(TProblem) -> TResult`
 - **SolverParadigm**: Exact, Construction, Improvement, Reduction
-- **SolverResultBase**: Common `Algorithm`, `Paradigm`, `Elapsed` fields
+- **SolverResult**: Common `Algorithm`, `Paradigm`, `Elapsed` fields
 - **DistanceMatrix / PermutationResult**: Precomputed cost lookup (Euclidean or raw) / Order, Distance (Permutation)
 - **SelectionProblem / SelectionResult**: Items, Capacity / Selected, TotalValue, TotalCost (SubsetSelection)
 - **AssignmentProblem / AssignmentResult**: Entities, Conflicts / Labels, LabelCount (ConstraintAssignment)

@@ -3,7 +3,7 @@ using CombinatorialOptimiser.Core.Metaheuristics;
 
 namespace CombinatorialOptimiser.SubsetSelection;
 
-internal sealed class SaSelectionSolver : SimulatedAnnealingBase<SelectionProblem, bool[]>, ISolver<SelectionProblem, SelectionResult>
+internal sealed class SaSelectionSolver : SimulatedAnnealing<SelectionProblem, bool[]>, ISolver<SelectionProblem, SelectionResult>
 {
     public string Name => "Simulated Annealing";
     public SolverParadigm Paradigm => SolverParadigm.Improvement;

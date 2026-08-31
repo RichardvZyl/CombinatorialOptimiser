@@ -12,7 +12,7 @@ namespace CombinatorialOptimiser.ConstraintAssignment;
 #pragma warning disable CA1819 // Labels array is a core solver output; switching to IReadOnlyList would break all solver and test code.
 public sealed record AssignmentResult(string Algorithm, SolverParadigm Paradigm, int[] Labels, int LabelCount, TimeSpan Elapsed)
 #pragma warning restore CA1819
-    : SolverResultBase(Algorithm, Paradigm, Elapsed)
+    : SolverResult(Algorithm, Paradigm, Elapsed)
 {
     /// <summary>Returns whether this assignment satisfies all conflicts in <paramref name="problem"/> (no conflicting pair shares a label).</summary>
     public bool IsValid(AssignmentProblem problem)

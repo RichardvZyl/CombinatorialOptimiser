@@ -2,9 +2,18 @@ using System.Globalization;
 using CombinatorialOptimiser.Core;
 using CombinatorialOptimiser.Permutation;
 
+// Beam search CLI options (parsed later)
+var argBeamEnabled = false; var argBeamWidth = 4; double argBeamTemp = 1.0; string? argBeamRank = null;
+
 ISolver<DistanceMatrix, PermutationResult>[] SolversFor(int n, DistanceMatrix? matrix)
 {
     var solvers = SolverRegistry.AllPermutationSolvers(n, matrix).ToArray();
+    if (argBeamEnabled)
+    {
+        var useLog = string.Equals(argBeamRank, "logprob", StringComparison.OrdinalIgnoreCase);
+        var beam = new BeamSearchSolver(argBeamWidth, argBeamTemp, useLog);
+        solvers = solvers.Concat(new[] { beam }).ToArray();
+    }
     return solvers;
 }
 
@@ -47,6 +56,9 @@ void PrintHelp()
     Console.WriteLine("  --cities <n>     Number of random cities to generate and solve");
     Console.WriteLine("  --seed <n>       RNG seed for reproducible city placement");
     Console.WriteLine("  --solver <name>  Run only solvers whose name contains <name> (case-insensitive)");
+    Console.WriteLine("  --beam-width <n>  Enable BeamSearch solver with beam width n (default 4)");
+    Console.WriteLine("  --beam-temp <t>   Temperature for beam softmax (default 1.0)");
+    Console.WriteLine("  --beam-rank <m>   Final ranking mode: 'tour' (distance) or 'logprob' (accumulated log-prob)");
     Console.WriteLine("  --help, -h       Show this message");
     Console.WriteLine("Examples:");
     Console.WriteLine("  dotnet run                              # interactive prompt + demos");
@@ -67,6 +79,9 @@ for (var i = 0; i < args.Length; i++)
         case "--cities" when i + 1 < args.Length: _ = int.TryParse(args[++i], NumberStyles.Integer, CultureInfo.InvariantCulture, out argCities); break;
         case "--seed" when i + 1 < args.Length: _ = int.TryParse(args[++i], NumberStyles.Integer, CultureInfo.InvariantCulture, out argSeed); break;
         case "--solver" when i + 1 < args.Length: argSolver = args[++i]; break;
+        case "--beam-width" when i + 1 < args.Length: _ = int.TryParse(args[++i], NumberStyles.Integer, CultureInfo.InvariantCulture, out argBeamWidth); argBeamEnabled = true; break;
+        case "--beam-temp" when i + 1 < args.Length: _ = double.TryParse(args[++i], NumberStyles.Float, CultureInfo.InvariantCulture, out argBeamTemp); argBeamEnabled = true; break;
+        case "--beam-rank" when i + 1 < args.Length: argBeamRank = args[++i]; argBeamEnabled = true; break;
         case "--help": case "-h": showHelp = true; break;
     }
 }
