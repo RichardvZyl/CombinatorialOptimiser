@@ -82,6 +82,8 @@ public static class SolverRegistry
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
+        // Ant Colony Optimization (pheromone-based stochastic search)
+        new AntColonySolver(),
     ];
 
     /// <summary>
