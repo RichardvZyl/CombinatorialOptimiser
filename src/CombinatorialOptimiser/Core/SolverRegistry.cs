@@ -82,6 +82,7 @@ public static class SolverRegistry
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
+        new GnnPolicySolver(), // learned GNN policy (ONNX); falls back to cheap heuristic when model unavailable
     ];
 
     /// <summary>
