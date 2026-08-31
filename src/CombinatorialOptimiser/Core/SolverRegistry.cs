@@ -60,6 +60,7 @@ public static class SolverRegistry
         new RecursiveBruteForceSolver(),   // recursive variant of brute force
         new BranchAndBoundSolver(),        // pruned exact search using bounds
         new HeldKarpSolver(),              // DP exact solver (2^n * n^2)
+        new IlpSolver(),                   // ILP wrapper (uses external ILP when available; Held-Karp fallback)
 
         // Fast constructive heuristics (cheap, often used as seeds)
         new NearestNeighborSolver(),       // greedy nearest unvisited
