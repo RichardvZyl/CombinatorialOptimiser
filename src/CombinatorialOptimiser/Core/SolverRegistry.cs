@@ -33,7 +33,7 @@ public static class SolverRegistry
     /// <summary>Returns all solvers appropriate for the given permutation problem size,
     /// optionally including Christofides-seeded variants if a distance matrix is provided.</summary>
     public static IReadOnlyList<ISolver<DistanceMatrix, PermutationResult>> AllPermutationSolvers(
-        int nodeCount, DistanceMatrix? matrix = null)
+        int nodeCount, DistanceMatrix? matrix = null, bool includeSeededVariants = false)
     {
         var all = AllSolvers();
         var filtered = nodeCount switch
@@ -49,7 +49,9 @@ public static class SolverRegistry
             _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true } and not ChristofidesSolver { UseExactMatching: false }).ToArray(),
         };
 
-        return nodeCount >= 4 && matrix is not null
+        // Only include seeded Christofides variants when explicitly requested. Seeding runs
+        // Christofides.Solve(matrix) which can be expensive; callers should opt in.
+        return nodeCount >= 4 && matrix is not null && includeSeededVariants
             ? filtered.Concat(ChristofidesSeededVariants(matrix)).ToArray()
             : filtered;
     }

@@ -77,8 +77,11 @@ public class SolverRegistryTests
         var (costs, nodes) = TestHelpers.MakeRawMatrix(8, seed: 1);
         var matrix = new DistanceMatrix(costs, nodes);
 
-        var solvers = SolverRegistry.AllPermutationSolvers(8, matrix);
+        var solversDefault = SolverRegistry.AllPermutationSolvers(8, matrix);
+        // Default behaviour: seeding is opt-in, so without the flag no seeded variants expected
+        Assert.DoesNotContain(solversDefault, s => s is IteratedLocalSearchSolver { Seed: not null });
 
-        Assert.Contains(solvers, s => s is IteratedLocalSearchSolver { Seed: not null });
+        var solversSeeded = SolverRegistry.AllPermutationSolvers(8, matrix, includeSeededVariants: true);
+        Assert.Contains(solversSeeded, s => s is IteratedLocalSearchSolver { Seed: not null });
     }
 }
