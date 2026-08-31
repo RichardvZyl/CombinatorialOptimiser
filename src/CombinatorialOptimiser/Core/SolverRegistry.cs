@@ -82,6 +82,8 @@ public static class SolverRegistry
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
+        // Monte Carlo sampling: random-shuffle sampling within a budget
+        new MCSamplingSolver(),
     ];
 
     /// <summary>
