@@ -51,9 +51,16 @@ public static class SolverRegistry
 
         // Only include seeded Christofides variants when explicitly requested. Seeding runs
         // Christofides.Solve(matrix) which can be expensive; callers should opt in.
-        return nodeCount >= 4 && matrix is not null && includeSeededVariants
-            ? filtered.Concat(ChristofidesSeededVariants(matrix)).ToArray()
-            : filtered;
+        if (nodeCount >= 4 && matrix is not null && includeSeededVariants)
+        {
+            var seeded = ChristofidesSeededVariants(matrix);
+            // Remove unseeded improvement solvers that the seeded variants replace to avoid duplicates.
+            var improvementTypes = new HashSet<Type> { typeof(TwoOptSolver), typeof(ThreeOptSolver), typeof(LinKernighanSolver), typeof(IteratedLocalSearchSolver) };
+            var withoutUnseededImprov = filtered.Where(s => !improvementTypes.Contains(s.GetType())).ToArray();
+            return withoutUnseededImprov.Concat(seeded).ToArray();
+        }
+
+        return filtered;
     }
 
     // Canonical list of available permutation solvers. Each entry below is intentionally
