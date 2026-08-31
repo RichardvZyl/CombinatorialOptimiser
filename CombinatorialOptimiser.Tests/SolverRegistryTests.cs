@@ -72,6 +72,19 @@ public class SolverRegistryTests
     }
 
     [Fact]
+    public void ThresholdConstants_AreUsedInRecommendPermutation()
+    {
+        // The constants are private; assert behaviour around boundaries to ensure they are applied
+        var beforeExact = SolverRegistry.RecommendPermutation(10);
+        var atDp = SolverRegistry.RecommendPermutation(16);
+        var pastNoExact = SolverRegistry.RecommendPermutation(19);
+
+        Assert.IsType<BruteForceSolver>(beforeExact);
+        Assert.IsType<HeldKarpSolver>(atDp);
+        Assert.IsType<LinKernighanSolver>(pastNoExact);
+    }
+
+    [Fact]
     public void AllPermutationSolvers_WithMatrix_IncludesChristofidesSeededVariants()
     {
         var (costs, nodes) = TestHelpers.MakeRawMatrix(8, seed: 1);
