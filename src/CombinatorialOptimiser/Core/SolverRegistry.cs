@@ -83,6 +83,8 @@ public static class SolverRegistry
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
         new VnsSolver(),
+        // Monte Carlo sampling: random-shuffle sampling within a budget
+        new MCSamplingSolver(),
     ];
 
     /// <summary>
