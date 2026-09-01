@@ -69,6 +69,7 @@ public static class SolverRegistry
         // Useful as an LLM-style decoder analogue (beam, temperature) and as a tunable
         // compromise between greedy and exhaustive search.
         new BeamSearchSolver(),
+        new DiverseBeamSolver(),            // Beam variant that encourages diversity across beam members
 
         // Approximation / reduction
         new ChristofidesSolver { UseExactMatching = true },
