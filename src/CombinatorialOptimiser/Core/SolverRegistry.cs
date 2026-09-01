@@ -83,6 +83,7 @@ public static class SolverRegistry
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
+        new VnsSolver(),
     ];
 
     /// <summary>
