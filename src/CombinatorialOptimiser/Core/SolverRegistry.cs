@@ -60,6 +60,7 @@ public static class SolverRegistry
         new RecursiveBruteForceSolver(),   // recursive variant of brute force
         new BranchAndBoundSolver(),        // pruned exact search using bounds
         new HeldKarpSolver(),              // DP exact solver (2^n * n^2)
+        new CpSatSolver(),                 // CP-SAT wrapper (uses OR-Tools if available; fallback otherwise)
 
         // Fast constructive heuristics (cheap, often used as seeds)
         new NearestNeighborSolver(),       // greedy nearest unvisited
@@ -68,6 +69,8 @@ public static class SolverRegistry
         // Useful as an LLM-style decoder analogue (beam, temperature) and as a tunable
         // compromise between greedy and exhaustive search.
         new BeamSearchSolver(),
+        // Monte Carlo Tree Search (MCTS) - simulation based search useful for planning-style tasks
+        new MctsSolver(),
 
         // Approximation / reduction
         new ChristofidesSolver { UseExactMatching = true },
@@ -88,7 +91,7 @@ public static class SolverRegistry
     /// Produce solver variants seeded from a Christofides tour.
     /// Runs Christofides (uses exact matching when matrix.Count is 20 or less) to obtain a seed tour,
     /// then returns improvement solvers (TwoOpt, ThreeOpt, LinKernighan, IteratedLocalSearch)
-    /// with their <c>Seed</c> property set to that tour. If seeding fails due to an
+    /// with their Seed property set to that tour. If seeding fails due to an
     /// invalid or degenerate matrix, the method returns an empty array so callers can
     /// continue without the seeded variants.
     /// </summary>
