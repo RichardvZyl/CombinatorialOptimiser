@@ -79,6 +79,7 @@ public static class SolverRegistry
         new LinKernighanSolver(),
 
         // Metaheuristics / stochastic improvement
+        new GraspSolver(),
         new IteratedLocalSearchSolver(),
         new SimulatedAnnealingSolver(),
         new GeneticAlgorithmSolver(),
