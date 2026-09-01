@@ -72,6 +72,7 @@ void PrintHelp()
 }
 
 var argCities = 0; var argSeed = -1; string? argSolver = null; var showHelp = false;
+var argSeedChristofides = false;
 for (var i = 0; i < args.Length; i++)
 {
     switch (args[i])
@@ -83,6 +84,7 @@ for (var i = 0; i < args.Length; i++)
         case "--beam-temp" when i + 1 < args.Length: _ = double.TryParse(args[++i], NumberStyles.Float, CultureInfo.InvariantCulture, out argBeamTemp); argBeamEnabled = true; break;
         case "--beam-rank" when i + 1 < args.Length: argBeamRank = args[++i]; argBeamEnabled = true; break;
         case "--help": case "-h": showHelp = true; break;
+        case "--seed-christofides": argSeedChristofides = true; break;
     }
 }
 if (showHelp) { PrintHelp(); return; }

@@ -7,11 +7,16 @@ namespace CombinatorialOptimiser.Core;
 /// <summary>Provides solver recommendations based on problem size.</summary>
 public static class SolverRegistry
 {
+    // Thresholds for selecting solver tiers. Extracted to named constants to ease tuning and testing.
+    private const int ExactSolverMaxNodes = 10;
+    private const int DpSolverMaxNodes = 16;
+    private const int NoExactBeyondNodes = 18; // kept for documentation; used implicitly via comparisons below
+
     /// <summary>Returns the recommended solver for a permutation problem of the given size.</summary>
     public static ISolver<DistanceMatrix, PermutationResult> RecommendPermutation(int nodeCount) => nodeCount switch
     {
-        <= 10 => new BruteForceSolver(),
-        <= 16 => new HeldKarpSolver(),
+        <= ExactSolverMaxNodes => new BruteForceSolver(),
+        <= DpSolverMaxNodes => new HeldKarpSolver(),
         <= 40 => new ChristofidesSolver { UseExactMatching = true },
         _ => new LinKernighanSolver(),
     };
@@ -33,20 +38,34 @@ public static class SolverRegistry
     /// <summary>Returns all solvers appropriate for the given permutation problem size,
     /// optionally including Christofides-seeded variants if a distance matrix is provided.</summary>
     public static IReadOnlyList<ISolver<DistanceMatrix, PermutationResult>> AllPermutationSolvers(
-        int nodeCount, DistanceMatrix? matrix = null)
+        int nodeCount, DistanceMatrix? matrix = null, bool includeSeededVariants = false)
     {
         var all = AllSolvers();
         var filtered = nodeCount switch
         {
-            <= 10 => all,
-            <= 16 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver).ToArray(),
-            <= 18 => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver).ToArray(),
-            _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true }).ToArray(),
+            <= ExactSolverMaxNodes => all,
+            // For moderate sizes we exclude brute-force variants and also branch-and-bound
+            // which tends to perform poorly beyond tiny n. Heavier exact solvers (Held-Karp)
+            // remain available in this tier.
+            <= DpSolverMaxNodes => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver).ToArray(),
+            // For slightly larger instances avoid exact exponential solvers; allow heuristics and metaheuristics.
+            <= NoExactBeyondNodes => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver).ToArray(),
+            // Very large instances: exclude heavy exact/reduction methods and keep constructive and metaheuristic solvers only.
+            _ => all.Where(s => s is not BruteForceSolver and not RecursiveBruteForceSolver and not BranchAndBoundSolver and not HeldKarpSolver and not ChristofidesSolver { UseExactMatching: true } and not ChristofidesSolver { UseExactMatching: false }).ToArray(),
         };
 
-        return nodeCount >= 4 && matrix is not null
-            ? filtered.Concat(ChristofidesSeededVariants(matrix)).ToArray()
-            : filtered;
+        // Only include seeded Christofides variants when explicitly requested. Seeding runs
+        // Christofides.Solve(matrix) which can be expensive; callers should opt in.
+        if (nodeCount >= 4 && matrix is not null && includeSeededVariants)
+        {
+            var seeded = ChristofidesSeededVariants(matrix);
+            // Remove unseeded improvement solvers that the seeded variants replace to avoid duplicates.
+            var improvementTypes = new HashSet<Type> { typeof(TwoOptSolver), typeof(ThreeOptSolver), typeof(LinKernighanSolver), typeof(IteratedLocalSearchSolver) };
+            var withoutUnseededImprov = filtered.Where(s => !improvementTypes.Contains(s.GetType())).ToArray();
+            return withoutUnseededImprov.Concat(seeded).ToArray();
+        }
+
+        return filtered;
     }
 
     // Canonical list of available permutation solvers. Each entry below is intentionally
@@ -77,6 +96,9 @@ public static class SolverRegistry
         new TwoOptSolver(),
         new ThreeOptSolver(),
         new LinKernighanSolver(),
+
+        // Rollout engine: one-step lookahead with a base policy
+        new RolloutSolver(),
 
         // Metaheuristics / stochastic improvement
         new IteratedLocalSearchSolver(),

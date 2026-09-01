@@ -49,6 +49,17 @@ public class SolverRegistryTests
         Assert.Contains(solvers, s => s is HeldKarpSolver);
     }
 
+    [Theory]
+    [InlineData(5, typeof(BruteForceSolver))]
+    [InlineData(11, typeof(HeldKarpSolver))]
+    [InlineData(17, typeof(NearestNeighborSolver))]
+    [InlineData(50, typeof(IteratedLocalSearchSolver))]
+    public void AllPermutationSolvers_ReturnsRepresentativeSolverTypes(int nodeCount, Type expectedRepresentative)
+    {
+        var solvers = SolverRegistry.AllPermutationSolvers(nodeCount, matrix: null);
+        Assert.Contains(solvers, s => expectedRepresentative.IsInstanceOfType(s));
+    }
+
     [Fact]
     public void AllPermutationSolvers_LargeProblem_ExcludesExpensiveExactSolvers()
     {
@@ -61,13 +72,32 @@ public class SolverRegistryTests
     }
 
     [Fact]
+    public void ThresholdConstants_AreUsedInRecommendPermutation()
+    {
+        // The constants are private; assert behaviour around boundaries to ensure they are applied
+        var beforeExact = SolverRegistry.RecommendPermutation(10);
+        var atDp = SolverRegistry.RecommendPermutation(16);
+        var nineteen = SolverRegistry.RecommendPermutation(19);
+        var fortyOne = SolverRegistry.RecommendPermutation(41);
+
+        Assert.IsType<BruteForceSolver>(beforeExact);
+        Assert.IsType<HeldKarpSolver>(atDp);
+        // 19 should still pick Christofides (threshold for LinKernighan is >40)
+        Assert.IsType<ChristofidesSolver>(nineteen);
+        Assert.IsType<LinKernighanSolver>(fortyOne);
+    }
+
+    [Fact]
     public void AllPermutationSolvers_WithMatrix_IncludesChristofidesSeededVariants()
     {
         var (costs, nodes) = TestHelpers.MakeRawMatrix(8, seed: 1);
         var matrix = new DistanceMatrix(costs, nodes);
 
-        var solvers = SolverRegistry.AllPermutationSolvers(8, matrix);
+        var solversDefault = SolverRegistry.AllPermutationSolvers(8, matrix);
+        // Default behaviour: seeding is opt-in, so without the flag no seeded variants expected
+        Assert.DoesNotContain(solversDefault, s => s is IteratedLocalSearchSolver { Seed: not null });
 
-        Assert.Contains(solvers, s => s is IteratedLocalSearchSolver { Seed: not null });
+        var solversSeeded = SolverRegistry.AllPermutationSolvers(8, matrix, includeSeededVariants: true);
+        Assert.Contains(solversSeeded, s => s is IteratedLocalSearchSolver { Seed: not null });
     }
 }
