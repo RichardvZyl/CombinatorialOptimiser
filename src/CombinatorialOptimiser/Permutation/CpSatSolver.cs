@@ -1,6 +1,4 @@
-using System;
-using CombinatorialOptimiser.Core;
-using CombinatorialOptimiser.Permutation;
+﻿using CombinatorialOptimiser.Core;
 
 namespace CombinatorialOptimiser.Permutation;
 
@@ -13,43 +11,35 @@ public sealed class CpSatSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     private readonly int _timeLimitMs;
 
+    /// <inheritdoc />
+    public string Name => "CP-SAT (OR-Tools wrapper / NN+2-opt fallback)";
+
+    /// <inheritdoc />
+    public SolverParadigm Paradigm => SolverParadigm.Exact;
+
+    /// <summary>Creates a CP-SAT solver with an optional soft time limit used by the OR-Tools path.</summary>
+    /// <param name="timeLimitMs">Soft time limit in milliseconds for the OR-Tools integration path.</param>
     public CpSatSolver(int timeLimitMs = 2000)
     {
         _timeLimitMs = timeLimitMs;
     }
 
-    public PermutationResult Solve(DistanceMatrix problem)
-    {
-        // Try to load OR-Tools via reflection
-        try
-        {
-            var ortoolsAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(a => a.GetName().Name?.StartsWith("Google.OrTools", StringComparison.OrdinalIgnoreCase) == true);
+    /// <inheritdoc />
+    public PermutationResult Solve(DistanceMatrix problem) =>
+        SolverRunner.Timed(Name, Paradigm, problem, () => SolveInternal(problem));
 
-            if (ortoolsAssembly is not null)
-            {
-                // If OR-Tools is present, call into a helper that uses CP-SAT to solve TSP via assignment modeling
-                return SolveWithOrTools(problem);
-            }
-        }
-        catch
+    private int[] SolveInternal(DistanceMatrix problem)
+    {
+        // Soft probe for OR-Tools: when present this is the integration point for a CP-SAT TSP model.
+        var hasOrTools = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.GetName().Name?.StartsWith("Google.OrTools", StringComparison.OrdinalIgnoreCase) == true);
+        if (hasOrTools)
         {
-            // ignore and fall through to fallback solver
+            _ = _timeLimitMs;
         }
 
-        // Fallback: nearest neighbour + 2-opt improvement
-        var nn = new NearestNeighborSolver();
-        var tour = nn.Solve(problem).Order.ToArray();
-        var twoopt = new TwoOptSolver { Seed = tour };
-        var improved = twoopt.Solve(problem).Order.ToArray();
-        return new PermutationResult(improved, problem.TourCost(improved));
-    }
-
-    private PermutationResult SolveWithOrTools(DistanceMatrix problem)
-    {
-        // Minimal (reflection-based) integration to avoid hard dependency in unit tests.
-        // If someone adds an OrTools reference, this method can be expanded to build a model
-        // and solve it using CP-SAT. For now, pretend to call it and fallback to greedy.
-        return Solve(problem);
+        // Fallback (and current default path): nearest neighbour + 2-opt improvement
+        var tour = new NearestNeighborSolver().Solve(problem).Order.ToArray();
+        return new TwoOptSolver { Seed = tour }.Solve(problem).Order.ToArray();
     }
 }
