@@ -2,3 +2,8 @@ bin/
 obj/
 *.user
 .vs/
+
+# Perseus generated output
+.hermes.md
+.perseus/cache/
+live-context.md
