@@ -60,9 +60,10 @@ public static class SolverRegistry
         new RecursiveBruteForceSolver(),   // recursive variant of brute force
         new BranchAndBoundSolver(),        // pruned exact search using bounds
         new HeldKarpSolver(),              // DP exact solver (2^n * n^2)
-        new CpSatSolver(),                 // CP-SAT wrapper (uses OR-Tools if available; fallback otherwise)
 
         // Fast constructive heuristics (cheap, often used as seeds)
+        new CpSatSolver(),                 // CP-SAT wrapper (uses OR-Tools if available; fallback otherwise)
+        new IlpSolver(),                   // ILP wrapper (uses external ILP when available; Held-Karp fallback)
         new NearestNeighborSolver(),       // greedy nearest unvisited
 
         // Beam search: heuristic constructive strategy guided by transition log-probabilities
