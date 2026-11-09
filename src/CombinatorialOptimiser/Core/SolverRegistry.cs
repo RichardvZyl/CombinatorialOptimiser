@@ -92,6 +92,7 @@ public static class SolverRegistry
         new DiverseBeamSolver(),            // Beam variant that encourages diversity across beam members
         // Monte Carlo Tree Search (MCTS) - simulation based search useful for planning-style tasks
         new MctsSolver(),
+        new MCSamplingSolver(),             // Random-shuffle sampling within a budget
 
         // Approximation / reduction
         new ChristofidesSolver { UseExactMatching = true },
