@@ -28,50 +28,49 @@ public sealed class AntColonySolver : ISolver<DistanceMatrix, PermutationResult>
     public double Beta { get; init; } = 2.0;
 
     /// <inheritdoc/>
-    public PermutationResult Solve(DistanceMatrix matrix)
-    {
-        ArgumentNullException.ThrowIfNull(matrix);
-        var n = matrix.Count;
-        var rng = new Random(123);
-        var pher = Enumerable.Range(0, n).Select(_ => Enumerable.Range(0, n).Select(__ => 1.0).ToArray()).ToArray();
-        var bestTour = Enumerable.Range(0, n).ToArray();
-        var bestCost = matrix.TourLength(bestTour);
-
-        for (int iter = 0; iter < Iterations; iter++)
+    public PermutationResult Solve(DistanceMatrix matrix) =>
+        SolverRunner.Timed(Name, Paradigm, matrix, () =>
         {
-            var ants = new List<int[]>();
-            for (int a = 0; a < Ants; a++)
+            ArgumentNullException.ThrowIfNull(matrix);
+            var n = matrix.Count;
+            var rng = new Random(123);
+            var pher = Enumerable.Range(0, n).Select(_ => Enumerable.Range(0, n).Select(__ => 1.0).ToArray()).ToArray();
+            var bestTour = Enumerable.Range(0, n).ToArray();
+            var bestCost = matrix.TourLength(bestTour);
+
+            for (int iter = 0; iter < Iterations; iter++)
             {
-                var tour = BuildTour(matrix, pher, rng);
-                var cost = matrix.TourLength(tour);
-                if (cost < bestCost)
+                var ants = new List<int[]>();
+                for (int a = 0; a < Ants; a++)
                 {
-                    bestCost = cost;
-                    bestTour = tour.ToArray();
+                    var tour = BuildTour(matrix, pher, rng);
+                    var cost = matrix.TourLength(tour);
+                    if (cost < bestCost)
+                    {
+                        bestCost = cost;
+                        bestTour = tour.ToArray();
+                    }
+                    ants.Add(tour);
                 }
-                ants.Add(tour);
-            }
 
-            // evaporate
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                    pher[i][j] *= (1.0 - Evaporation);
-
-            // deposit
-            foreach (var tour in ants)
-            {
-                var cost = matrix.TourLength(tour);
                 for (int i = 0; i < n; i++)
+                    for (int j = 0; j < n; j++)
+                        pher[i][j] *= (1.0 - Evaporation);
+
+                foreach (var tour in ants)
                 {
-                    var a = tour[i];
-                    var b = tour[(i + 1) % n];
-                    pher[a][b] += 1.0 / Math.Max(1e-9, cost);
+                    var cost = matrix.TourLength(tour);
+                    for (int i = 0; i < n; i++)
+                    {
+                        var a = tour[i];
+                        var b = tour[(i + 1) % n];
+                        pher[a][b] += 1.0 / Math.Max(1e-9, cost);
+                    }
                 }
             }
-        }
 
-        return new PermutationResult(bestTour, bestCost);
-    }
+            return bestTour;
+        });
 
     private int[] BuildTour(DistanceMatrix matrix, double[][] pher, Random rng)
     {

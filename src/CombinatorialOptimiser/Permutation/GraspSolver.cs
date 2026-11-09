@@ -17,27 +17,28 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
     public int Iterations { get; init; } = 50;
     public double RclAlpha { get; init; } = 0.2;
 
-    public PermutationResult Solve(DistanceMatrix matrix)
-    {
-        var n = matrix.Count;
-        var rng = new Random(99);
-        var best = Enumerable.Range(0, n).ToArray();
-        var bestCost = matrix.TourCost(best);
-
-        for (int it = 0; it < Iterations; it++)
+    public PermutationResult Solve(DistanceMatrix matrix) =>
+        SolverRunner.Timed(Name, Paradigm, matrix, () =>
         {
-            var tour = BuildGreedyRandomized(matrix, rng);
-            tour = TwoOptLocalImprove(matrix, tour);
-            var cost = matrix.TourCost(tour);
-            if (cost < bestCost)
-            {
-                bestCost = cost;
-                best = tour.ToArray();
-            }
-        }
+            var n = matrix.Count;
+            var rng = new Random(99);
+            var best = Enumerable.Range(0, n).ToArray();
+            var bestCost = matrix.TourLength(best);
 
-        return new PermutationResult(best, bestCost);
-    }
+            for (int it = 0; it < Iterations; it++)
+            {
+                var tour = BuildGreedyRandomized(matrix, rng);
+                tour = TwoOptLocalImprove(matrix, tour);
+                var cost = matrix.TourLength(tour);
+                if (cost < bestCost)
+                {
+                    bestCost = cost;
+                    best = tour.ToArray();
+                }
+            }
+
+            return best;
+        });
 
     private int[] BuildGreedyRandomized(DistanceMatrix matrix, Random rng)
     {
@@ -58,7 +59,7 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
         return tour.ToArray();
     }
 
-    private int[] TwoOptLocalImprove(DistanceMatrix matrix, int[] tour)
+    private static int[] TwoOptLocalImprove(DistanceMatrix matrix, int[] tour)
     {
         var improved = true;
         var n = tour.Length;
@@ -71,7 +72,7 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
             {
                 var candidate = current.ToArray();
                 Array.Reverse(candidate, i, j - i + 1);
-                if (matrix.TourCost(candidate) < matrix.TourCost(current))
+                if (matrix.TourLength(candidate) < matrix.TourLength(current))
                 {
                     current = candidate;
                     improved = true;
