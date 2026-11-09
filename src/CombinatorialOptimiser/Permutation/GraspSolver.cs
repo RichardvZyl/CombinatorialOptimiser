@@ -12,6 +12,8 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    public string Name => "GRASP";
+    public SolverParadigm Paradigm => SolverParadigm.Improvement;
     public int Iterations { get; init; } = 50;
     public double RclAlpha { get; init; } = 0.2;
 
@@ -78,5 +80,4 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
         }
 
         return current;
-    }
-}
+    }
