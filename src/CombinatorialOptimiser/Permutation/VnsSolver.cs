@@ -11,14 +11,21 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <inheritdoc/>
+    public string Name => "Variable Neighborhood Search";
+    /// <inheritdoc/>
+    public SolverParadigm Paradigm => SolverParadigm.Improvement;
+        /// <summary>Number of iterations.</summary>
     public int Iterations { get; init; } = 50;
 
+        /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var n = matrix.Count;
         var rng = new Random(42);
         var current = Enumerable.Range(0, n).OrderBy(i => rng.Next()).ToArray();
-        var bestCost = matrix.TourCost(current);
+        var bestCost = matrix.TourLength(current);
 
         for (int it = 0; it < Iterations; it++)
         {
@@ -26,7 +33,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
             var k = (it % 2) + 2; // 2 or 3
             var shaken = Shake(current, k, rng);
             var improved = LocalSearch(matrix, shaken);
-            var cost = matrix.TourCost(improved);
+            var cost = matrix.TourLength(improved);
             if (cost < bestCost)
             {
                 current = improved;
@@ -34,10 +41,10 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
             }
         }
 
-        return new PermutationResult(current, bestCost);
+        return SolverRunner.Timed(Name, Paradigm, matrix, () => current);
     }
 
-    private int[] Shake(int[] tour, int k, Random rng)
+    private static int[] Shake(int[] tour, int k, Random rng)
     {
         var n = tour.Length;
         var t = tour.ToArray();
@@ -46,7 +53,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
         return t;
     }
 
-    private int[] LocalSearch(DistanceMatrix matrix, int[] tour)
+    private static int[] LocalSearch(DistanceMatrix matrix, int[] tour)
     {
         // simple 2-opt local search
         var improved = true;
@@ -60,7 +67,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
             {
                 var candidate = current.ToArray();
                 Array.Reverse(candidate, i, j - i + 1);
-                if (matrix.TourCost(candidate) < matrix.TourCost(current))
+                if (matrix.TourLength(candidate) < matrix.TourLength(current))
                 {
                     current = candidate;
                     improved = true;
