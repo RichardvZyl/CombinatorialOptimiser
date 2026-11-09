@@ -31,7 +31,7 @@ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResul
     private int[] SolveInternal(DistanceMatrix matrix)
     {
         ArgumentNullException.ThrowIfNull(matrix);
-        var beam = new List<int[]> { [0] };
+        var beam = new List<int[]> { new[] { 0 } };
         var beamScores = new List<double> { 0.0 };
 
         var logProbs = matrix.TransitionLogProbabilities(Temperature);
