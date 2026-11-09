@@ -80,4 +80,5 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
         }
 
         return current;
-    }
+    }
+}
