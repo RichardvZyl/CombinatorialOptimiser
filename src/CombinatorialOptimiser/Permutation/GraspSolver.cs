@@ -12,11 +12,16 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <inheritdoc/>
     public string Name => "GRASP";
+    /// <inheritdoc/>
     public SolverParadigm Paradigm => SolverParadigm.Improvement;
+    /// <summary>Number of GRASP iterations.</summary>
     public int Iterations { get; init; } = 50;
+    /// <summary>RCL cutoff factor (0–1).</summary>
     public double RclAlpha { get; init; } = 0.2;
 
+    /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix matrix) =>
         SolverRunner.Timed(Name, Paradigm, matrix, () =>
         {
