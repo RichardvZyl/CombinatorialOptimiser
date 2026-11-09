@@ -12,19 +12,30 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class AntColonySolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <inheritdoc/>
+    public string Name => "Ant Colony Optimization";
+    /// <inheritdoc/>
+    public SolverParadigm Paradigm => SolverParadigm.Improvement;
+    /// <summary>Number of ants.</summary>
     public int Ants { get; init; } = 10;
+    /// <summary>Number of iterations.</summary>
     public int Iterations { get; init; } = 50;
+    /// <summary>Evaporation rate.</summary>
     public double Evaporation { get; init; } = 0.1;
+    /// <summary>Alpha param.</summary>
     public double Alpha { get; init; } = 1.0;
+    /// <summary>Beta param.</summary>
     public double Beta { get; init; } = 2.0;
 
+    /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var n = matrix.Count;
         var rng = new Random(123);
         var pher = Enumerable.Range(0, n).Select(_ => Enumerable.Range(0, n).Select(__ => 1.0).ToArray()).ToArray();
         var bestTour = Enumerable.Range(0, n).ToArray();
-        var bestCost = matrix.TourCost(bestTour);
+        var bestCost = matrix.TourLength(bestTour);
 
         for (int iter = 0; iter < Iterations; iter++)
         {
@@ -32,7 +43,7 @@ public sealed class AntColonySolver : ISolver<DistanceMatrix, PermutationResult>
             for (int a = 0; a < Ants; a++)
             {
                 var tour = BuildTour(matrix, pher, rng);
-                var cost = matrix.TourCost(tour);
+                var cost = matrix.TourLength(tour);
                 if (cost < bestCost)
                 {
                     bestCost = cost;
@@ -49,7 +60,7 @@ public sealed class AntColonySolver : ISolver<DistanceMatrix, PermutationResult>
             // deposit
             foreach (var tour in ants)
             {
-                var cost = matrix.TourCost(tour);
+                var cost = matrix.TourLength(tour);
                 for (int i = 0; i < n; i++)
                 {
                     var a = tour[i];
