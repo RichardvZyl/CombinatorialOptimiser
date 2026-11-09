@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
 using CombinatorialOptimiser.Core;
-using CombinatorialOptimiser.Permutation;
 
 namespace CombinatorialOptimiser.Permutation;
 
@@ -12,14 +9,23 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
 {
-    private readonly int _timeLimitMs;
+    /// <inheritdoc/>
+    public string Name => "ILP";
 
-    public IlpSolver(int timeLimitMs = 2000)
-    {
-        _timeLimitMs = timeLimitMs;
-    }
+    /// <inheritdoc/>
+    public SolverParadigm Paradigm => SolverParadigm.Exact;
 
-    public PermutationResult Solve(DistanceMatrix problem)
+    /// <summary>Search time limit in milliseconds when an external ILP backend is available.</summary>
+    public int TimeLimitMs { get; }
+
+    /// <summary>Create a new ILP wrapper solver.</summary>
+    /// <param name="timeLimitMs">Search time limit in milliseconds when an ILP backend is available.</param>
+    public IlpSolver(int timeLimitMs = 2000) => TimeLimitMs = timeLimitMs;
+
+    /// <inheritdoc/>
+    public PermutationResult Solve(DistanceMatrix problem) => SolveInternal(problem);
+
+    private PermutationResult SolveInternal(DistanceMatrix problem)
     {
         try
         {
@@ -29,21 +35,19 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
                                      || a.GetName().Name?.IndexOf("Google.OrTools", StringComparison.OrdinalIgnoreCase) >= 0);
 
             if (ilpAssembly is not null)
-            {
                 return SolveWithIlp(problem);
-            }
         }
-        catch
+#pragma warning disable CA1031 // Optional ILP dependency; any failure must fall back.
+        catch (Exception)
+#pragma warning restore CA1031
         {
-            // ignore and fall back
+            // Fall through to Held-Karp.
         }
 
-        // Fallback to Held-Karp DP exact solver when ILP not available (good for small n)
-        var hk = new HeldKarpSolver();
-        return hk.Solve(problem);
+        return new HeldKarpSolver().Solve(problem);
     }
 
-    private PermutationResult SolveWithIlp(DistanceMatrix problem)
+    private static PermutationResult SolveWithIlp(DistanceMatrix problem)
     {
         // Placeholder for a future real ILP integration. For now, delegate to Held-Karp
         // to provide deterministic behaviour in tests and CI.
