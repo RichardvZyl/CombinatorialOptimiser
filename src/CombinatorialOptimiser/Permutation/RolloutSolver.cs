@@ -14,19 +14,24 @@ namespace CombinatorialOptimiser.Permutation;
 public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
 {
     /// <summary>Human-readable name.</summary>
+    /// <inheritdoc/>
     public string Name => "Rollout (one-step lookahead)";
 
     /// <summary>Algorithmic paradigm.</summary>
+    /// <inheritdoc/>
     public SolverParadigm Paradigm => SolverParadigm.Construction;
 
     /// <summary>Base policy used for rollouts (defaults to nearest-neighbour).</summary>
+    /// <inheritdoc/>
     public ISolver<DistanceMatrix, PermutationResult> BasePolicy { get; init; } = new NearestNeighborSolver();
 
     /// <summary>Synchronous solve entrypoint.</summary>
+    /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix matrix) => SolverRunner.Timed(Name, Paradigm, matrix, () => SolveInternal(matrix));
 
     private int[] SolveInternal(DistanceMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var n = matrix.Count;
         var order = new List<int>();
         var used = new HashSet<int>();
