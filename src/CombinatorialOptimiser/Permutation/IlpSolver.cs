@@ -12,13 +12,19 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <inheritdoc/>
+    public string Name => "ILP";
+    /// <inheritdoc/>
+    public SolverParadigm Paradigm => SolverParadigm.Exact;
     private readonly int _timeLimitMs;
 
+        /// <summary>Constructor.</summary>
     public IlpSolver(int timeLimitMs = 2000)
     {
         _timeLimitMs = timeLimitMs;
     }
 
+        /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix problem)
     {
         try
@@ -33,7 +39,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
                 return SolveWithIlp(problem);
             }
         }
-        catch
+        catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // ignore and fall back
         }
@@ -43,7 +49,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
         return hk.Solve(problem);
     }
 
-    private PermutationResult SolveWithIlp(DistanceMatrix problem)
+    private static PermutationResult SolveWithIlp(DistanceMatrix problem)
     {
         // Placeholder for a future real ILP integration. For now, delegate to Held-Karp
         // to provide deterministic behaviour in tests and CI.

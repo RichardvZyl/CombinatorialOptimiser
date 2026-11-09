@@ -13,12 +13,21 @@ namespace CombinatorialOptimiser.Permutation;
 /// </summary>
 public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResult>
 {
+    /// <inheritdoc/>
+    public string Name => "Diverse Beam Search";
+    /// <inheritdoc/>
+    public SolverParadigm Paradigm => SolverParadigm.Construction;
+        /// <summary>Beam width.</summary>
     public int BeamWidth { get; init; } = 6;
+        /// <summary>Temperature.</summary>
     public double Temperature { get; init; } = 1.0;
+        /// <summary>Diversity strength.</summary>
     public double DiversityStrength { get; init; } = 0.5;
 
+        /// <inheritdoc/>
     public PermutationResult Solve(DistanceMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var beam = new List<int[]> { Array.Empty<int>() };
         var beamScores = new List<double> { 0.0 };
 
@@ -61,7 +70,7 @@ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResul
         // final ranking: pick best complete tour
         var final = beam.OrderByDescending(t => t.Select((v, i) => 0).Sum()).First();
         var order = final.ToArray();
-        return new PermutationResult(order, matrix.TourCost(order));
+        return SolverRunner.Timed(Name, Paradigm, matrix, () => order);
     }
 
     private static double JaccardSimilarity(int[] a, int[] b)
