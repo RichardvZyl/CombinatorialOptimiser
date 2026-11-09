@@ -23,9 +23,9 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
     public IlpSolver(int timeLimitMs = 2000) => TimeLimitMs = timeLimitMs;
 
     /// <inheritdoc/>
-    public PermutationResult Solve(DistanceMatrix problem) => SolveInternal(problem);
+    public PermutationResult Solve(DistanceMatrix problem) => SolveOrFallback(problem);
 
-    private PermutationResult SolveInternal(DistanceMatrix problem)
+    private static PermutationResult SolveOrFallback(DistanceMatrix problem)
     {
         try
         {
