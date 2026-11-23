@@ -1,4 +1,8 @@
-﻿# AGENTS.md
+# AGENTS.md
+
+## Branching location
+
+Branching is ONLY allowed from a git repo under E:\Development\repositories\RichardvZyl, and ONLY as a new worktree next to that repo's root\ (E:\Development\repositories\RichardvZyl\{repo}\{new-worktree}). Never branch inside root\ itself, never branch anywhere else.
 
 Read this first each session instead of re-scanning the whole tree. For deeper
 detail see `README.md` (usage + algorithm tables) and `PROJECT_INFO.md`
