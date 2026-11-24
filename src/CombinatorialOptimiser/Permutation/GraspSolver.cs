@@ -73,14 +73,30 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
         {
             improved = false;
             for (int i = 0; i < n - 1; i++)
-            for (int j = i + 1; j < n; j++)
             {
-                var candidate = current.ToArray();
-                Array.Reverse(candidate, i, j - i + 1);
-                if (matrix.TourLength(candidate) < matrix.TourLength(current))
+                // Accumulated cost change of reversing the interior edges t[i..j] (handles asymmetric matrices).
+                var interiorDelta = 0.0;
+                for (int j = i + 1; j < n; j++)
                 {
-                    current = candidate;
-                    improved = true;
+                    interiorDelta += matrix[current[j], current[j - 1]] - matrix[current[j - 1], current[j]];
+
+                    // Reversing the whole tour leaves no boundary edges; skip it.
+                    if (i == 0 && j == n - 1) continue;
+
+                    var prev = current[(i - 1 + n) % n];
+                    var next = current[(j + 1) % n];
+                    var boundaryDelta = matrix[prev, current[j]] + matrix[current[i], next]
+                        - matrix[prev, current[i]] - matrix[current[j], next];
+
+                    if (boundaryDelta + interiorDelta < -1e-10)
+                    {
+                        Array.Reverse(current, i, j - i + 1);
+                        improved = true;
+                        // Segment changed; restart accumulation from the new state for this i.
+                        interiorDelta = 0.0;
+                        for (int k = i + 1; k <= j; k++)
+                            interiorDelta += matrix[current[k], current[k - 1]] - matrix[current[k - 1], current[k]];
+                    }
                 }
             }
         }
