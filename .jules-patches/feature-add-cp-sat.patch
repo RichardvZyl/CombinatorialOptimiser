@@ -1,0 +1,108 @@
+From 0ad7fba6b13998fde14be394b9ffdfc15a770f5e Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 19:48:47 +0000
+Subject: [PATCH] fix: correct ISolver interface implementation
+
+---
+ .../Permutation/CpSatSolverTests.cs                    |  1 -
+ src/CombinatorialOptimiser/Permutation/CpSatSolver.cs  | 10 ++++++++--
+ src/CombinatorialOptimiser/Permutation/IlpSolver.cs    | 10 ++++++++--
+ 3 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/CombinatorialOptimiser.Tests/Permutation/CpSatSolverTests.cs b/CombinatorialOptimiser.Tests/Permutation/CpSatSolverTests.cs
+index 9fa3d95..b950771 100644
+--- a/CombinatorialOptimiser.Tests/Permutation/CpSatSolverTests.cs
++++ b/CombinatorialOptimiser.Tests/Permutation/CpSatSolverTests.cs
+@@ -1,5 +1,4 @@
+ using CombinatorialOptimiser.Permutation;
+-using CombinatorialOptimiser.Permutation;
+ using CombinatorialOptimiser.Core;
+ 
+ namespace CombinatorialOptimiser.Tests.Permutation;
+diff --git a/src/CombinatorialOptimiser/Permutation/CpSatSolver.cs b/src/CombinatorialOptimiser/Permutation/CpSatSolver.cs
+index 5cad1e8..b01c40d 100644
+--- a/src/CombinatorialOptimiser/Permutation/CpSatSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/CpSatSolver.cs
+@@ -11,13 +11,19 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class CpSatSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "CP-SAT";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Exact;
+     private readonly int _timeLimitMs;
+ 
++        /// <summary>Constructor.</summary>
+     public CpSatSolver(int timeLimitMs = 2000)
+     {
+         _timeLimitMs = timeLimitMs;
+     }
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix problem)
+     {
+         // Try to load OR-Tools via reflection
+@@ -32,7 +38,7 @@ public sealed class CpSatSolver : ISolver<DistanceMatrix, PermutationResult>
+                 return SolveWithOrTools(problem);
+             }
+         }
+-        catch
++        catch (Exception ex) when (ex is not OutOfMemoryException)
+         {
+             // ignore and fall through to fallback solver
+         }
+@@ -42,7 +48,7 @@ public sealed class CpSatSolver : ISolver<DistanceMatrix, PermutationResult>
+         var tour = nn.Solve(problem).Order.ToArray();
+         var twoopt = new TwoOptSolver { Seed = tour };
+         var improved = twoopt.Solve(problem).Order.ToArray();
+-        return new PermutationResult(improved, problem.TourCost(improved));
++        return SolverRunner.Timed(Name, Paradigm, problem, () => improved);
+     }
+ 
+     private PermutationResult SolveWithOrTools(DistanceMatrix problem)
+diff --git a/src/CombinatorialOptimiser/Permutation/IlpSolver.cs b/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
+index fd02652..1411c6a 100644
+--- a/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
+@@ -12,13 +12,19 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "ILP";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Exact;
+     private readonly int _timeLimitMs;
+ 
++        /// <summary>Constructor.</summary>
+     public IlpSolver(int timeLimitMs = 2000)
+     {
+         _timeLimitMs = timeLimitMs;
+     }
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix problem)
+     {
+         try
+@@ -33,7 +39,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+                 return SolveWithIlp(problem);
+             }
+         }
+-        catch
++        catch (Exception ex) when (ex is not OutOfMemoryException)
+         {
+             // ignore and fall back
+         }
+@@ -43,7 +49,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+         return hk.Solve(problem);
+     }
+ 
+-    private PermutationResult SolveWithIlp(DistanceMatrix problem)
++    private static PermutationResult SolveWithIlp(DistanceMatrix problem)
+     {
+         // Placeholder for a future real ILP integration. For now, delegate to Held-Karp
+         // to provide deterministic behaviour in tests and CI.
+-- 
+2.53.0

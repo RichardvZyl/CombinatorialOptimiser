@@ -1,0 +1,81 @@
+From 007faeaca169055e8c1f96443c52a559ed8d4f43 Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 19:50:34 +0000
+Subject: [PATCH] fix: correct ISolver interface implementation
+
+---
+ .../Permutation/DiverseBeamSolver.cs                  | 11 ++++++++++-
+ .../Permutation/GnnPolicySolver.cs                    |  9 ++++++++-
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs b/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
+index f813e4e..dd1eaa3 100644
+--- a/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
+@@ -13,12 +13,21 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "Diverse Beam Search";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Construction;
++        /// <summary>Beam width.</summary>
+     public int BeamWidth { get; init; } = 6;
++        /// <summary>Temperature.</summary>
+     public double Temperature { get; init; } = 1.0;
++        /// <summary>Diversity strength.</summary>
+     public double DiversityStrength { get; init; } = 0.5;
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var beam = new List<int[]> { Array.Empty<int>() };
+         var beamScores = new List<double> { 0.0 };
+ 
+@@ -61,7 +70,7 @@ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResul
+         // final ranking: pick best complete tour
+         var final = beam.OrderByDescending(t => t.Select((v, i) => 0).Sum()).First();
+         var order = final.ToArray();
+-        return new PermutationResult(order, matrix.TourCost(order));
++        return SolverRunner.Timed(Name, Paradigm, matrix, () => order);
+     }
+ 
+     private static double JaccardSimilarity(int[] a, int[] b)
+diff --git a/src/CombinatorialOptimiser/Permutation/GnnPolicySolver.cs b/src/CombinatorialOptimiser/Permutation/GnnPolicySolver.cs
+index 52d1f0e..92d8f15 100644
+--- a/src/CombinatorialOptimiser/Permutation/GnnPolicySolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/GnnPolicySolver.cs
+@@ -13,13 +13,20 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class GnnPolicySolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "GNN Policy";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Construction;
+     private readonly int _seed;
+ 
++        /// <summary>Constructor</summary>
+     public GnnPolicySolver(int seed = 42) => _seed = seed;
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix)
+     {
+         // Fallback: rank nodes by sum of outgoing distances (cheap centrality heuristic)
++        ArgumentNullException.ThrowIfNull(matrix);
+         var n = matrix.Count;
+         var scores = new double[n];
+         for (int i = 0; i < n; i++)
+@@ -30,6 +37,6 @@ public sealed class GnnPolicySolver : ISolver<DistanceMatrix, PermutationResult>
+         }
+ 
+         var order = scores.Select((s, i) => (s, i)).OrderByDescending(x => x.s).Select(x => x.i).ToArray();
+-        return new PermutationResult(order, matrix.TourCost(order));
++        return SolverRunner.Timed(Name, Paradigm, matrix, () => order);
+     }
+ }
+-- 
+2.53.0

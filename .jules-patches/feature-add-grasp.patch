@@ -1,0 +1,148 @@
+From 82940d24c084f7059c25f1ffb8581dd5b51a027f Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 21:13:58 +0000
+Subject: [PATCH] fix: correct ISolver interface implementation
+
+---
+ .../Permutation/GraspSolver.cs                | 19 ++++++++++++++-----
+ .../Permutation/VnsSolver.cs                  | 19 +++++++++++++------
+ 2 files changed, 27 insertions(+), 11 deletions(-)
+
+diff --git a/src/CombinatorialOptimiser/Permutation/GraspSolver.cs b/src/CombinatorialOptimiser/Permutation/GraspSolver.cs
+index e7169c2..76a946f 100644
+--- a/src/CombinatorialOptimiser/Permutation/GraspSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/GraspSolver.cs
+@@ -12,21 +12,29 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "GRASP";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Improvement;
++        /// <summary>Number of iterations.</summary>
+     public int Iterations { get; init; } = 50;
++        /// <summary>RCL Alpha param.</summary>
+     public double RclAlpha { get; init; } = 0.2;
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var n = matrix.Count;
+         var rng = new Random(99);
+         var best = Enumerable.Range(0, n).ToArray();
+-        var bestCost = matrix.TourCost(best);
++        var bestCost = matrix.TourLength(best);
+ 
+         for (int it = 0; it < Iterations; it++)
+         {
+             var tour = BuildGreedyRandomized(matrix, rng);
+             tour = TwoOptLocalImprove(matrix, tour);
+-            var cost = matrix.TourCost(tour);
++            var cost = matrix.TourLength(tour);
+             if (cost < bestCost)
+             {
+                 bestCost = cost;
+@@ -34,11 +42,12 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
+             }
+         }
+ 
+-        return new PermutationResult(best, bestCost);
++        return SolverRunner.Timed(Name, Paradigm, matrix, () => best);
+     }
+ 
+     private int[] BuildGreedyRandomized(DistanceMatrix matrix, Random rng)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var n = matrix.Count;
+         var start = rng.Next(n);
+         var tour = new List<int> { start };
+@@ -56,7 +65,7 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
+         return tour.ToArray();
+     }
+ 
+-    private int[] TwoOptLocalImprove(DistanceMatrix matrix, int[] tour)
++    private static int[] TwoOptLocalImprove(DistanceMatrix matrix, int[] tour)
+     {
+         var improved = true;
+         var n = tour.Length;
+@@ -69,7 +78,7 @@ public sealed class GraspSolver : ISolver<DistanceMatrix, PermutationResult>
+             {
+                 var candidate = current.ToArray();
+                 Array.Reverse(candidate, i, j - i + 1);
+-                if (matrix.TourCost(candidate) < matrix.TourCost(current))
++                if (matrix.TourLength(candidate) < matrix.TourLength(current))
+                 {
+                     current = candidate;
+                     improved = true;
+diff --git a/src/CombinatorialOptimiser/Permutation/VnsSolver.cs b/src/CombinatorialOptimiser/Permutation/VnsSolver.cs
+index 2137f0a..bfb9db2 100644
+--- a/src/CombinatorialOptimiser/Permutation/VnsSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/VnsSolver.cs
+@@ -11,14 +11,21 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "Variable Neighborhood Search";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Improvement;
++        /// <summary>Number of iterations.</summary>
+     public int Iterations { get; init; } = 50;
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var n = matrix.Count;
+         var rng = new Random(42);
+         var current = Enumerable.Range(0, n).OrderBy(i => rng.Next()).ToArray();
+-        var bestCost = matrix.TourCost(current);
++        var bestCost = matrix.TourLength(current);
+ 
+         for (int it = 0; it < Iterations; it++)
+         {
+@@ -26,7 +33,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
+             var k = (it % 2) + 2; // 2 or 3
+             var shaken = Shake(current, k, rng);
+             var improved = LocalSearch(matrix, shaken);
+-            var cost = matrix.TourCost(improved);
++            var cost = matrix.TourLength(improved);
+             if (cost < bestCost)
+             {
+                 current = improved;
+@@ -34,10 +41,10 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
+             }
+         }
+ 
+-        return new PermutationResult(current, bestCost);
++        return SolverRunner.Timed(Name, Paradigm, matrix, () => current);
+     }
+ 
+-    private int[] Shake(int[] tour, int k, Random rng)
++    private static int[] Shake(int[] tour, int k, Random rng)
+     {
+         var n = tour.Length;
+         var t = tour.ToArray();
+@@ -46,7 +53,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
+         return t;
+     }
+ 
+-    private int[] LocalSearch(DistanceMatrix matrix, int[] tour)
++    private static int[] LocalSearch(DistanceMatrix matrix, int[] tour)
+     {
+         // simple 2-opt local search
+         var improved = true;
+@@ -60,7 +67,7 @@ public sealed class VnsSolver : ISolver<DistanceMatrix, PermutationResult>
+             {
+                 var candidate = current.ToArray();
+                 Array.Reverse(candidate, i, j - i + 1);
+-                if (matrix.TourCost(candidate) < matrix.TourCost(current))
++                if (matrix.TourLength(candidate) < matrix.TourLength(current))
+                 {
+                     current = candidate;
+                     improved = true;
+-- 
+2.53.0

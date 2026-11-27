@@ -1,0 +1,56 @@
+[
+    {
+        "branch":  "feature/add-aco",
+        "file":  null,
+        "len":  3377,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-cp-sat",
+        "file":  null,
+        "len":  4390,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-diverse-beam",
+        "file":  null,
+        "len":  3619,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-mc-sampling",
+        "file":  null,
+        "len":  3196,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-rollout",
+        "file":  null,
+        "len":  2765,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-vns",
+        "file":  null,
+        "len":  3256,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-ilp",
+        "file":  null,
+        "len":  3762,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-grasp",
+        "file":  null,
+        "len":  6170,
+        "subj":  "fix: correct ISolver interface implementation"
+    },
+    {
+        "branch":  "feature/add-gnn-policy",
+        "file":  null,
+        "len":  4907,
+        "subj":  "fix: correct ISolver interface implementation"
+    }
+]

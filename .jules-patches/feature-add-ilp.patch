@@ -1,0 +1,90 @@
+From db4ab9ba3bf63394b88207b5358e17581a3c3a48 Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 21:06:19 +0000
+Subject: [PATCH] fix: correct ISolver interface implementation
+
+---
+ .../Permutation/DiverseBeamSolver.cs                  | 11 ++++++++++-
+ src/CombinatorialOptimiser/Permutation/IlpSolver.cs   | 10 ++++++++--
+ 2 files changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs b/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
+index f813e4e..dd1eaa3 100644
+--- a/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/DiverseBeamSolver.cs
+@@ -13,12 +13,21 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "Diverse Beam Search";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Construction;
++        /// <summary>Beam width.</summary>
+     public int BeamWidth { get; init; } = 6;
++        /// <summary>Temperature.</summary>
+     public double Temperature { get; init; } = 1.0;
++        /// <summary>Diversity strength.</summary>
+     public double DiversityStrength { get; init; } = 0.5;
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var beam = new List<int[]> { Array.Empty<int>() };
+         var beamScores = new List<double> { 0.0 };
+ 
+@@ -61,7 +70,7 @@ public sealed class DiverseBeamSolver : ISolver<DistanceMatrix, PermutationResul
+         // final ranking: pick best complete tour
+         var final = beam.OrderByDescending(t => t.Select((v, i) => 0).Sum()).First();
+         var order = final.ToArray();
+-        return new PermutationResult(order, matrix.TourCost(order));
++        return SolverRunner.Timed(Name, Paradigm, matrix, () => order);
+     }
+ 
+     private static double JaccardSimilarity(int[] a, int[] b)
+diff --git a/src/CombinatorialOptimiser/Permutation/IlpSolver.cs b/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
+index fd02652..1411c6a 100644
+--- a/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/IlpSolver.cs
+@@ -12,13 +12,19 @@ namespace CombinatorialOptimiser.Permutation;
+ /// </summary>
+ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
++    /// <inheritdoc/>
++    public string Name => "ILP";
++    /// <inheritdoc/>
++    public SolverParadigm Paradigm => SolverParadigm.Exact;
+     private readonly int _timeLimitMs;
+ 
++        /// <summary>Constructor.</summary>
+     public IlpSolver(int timeLimitMs = 2000)
+     {
+         _timeLimitMs = timeLimitMs;
+     }
+ 
++        /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix problem)
+     {
+         try
+@@ -33,7 +39,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+                 return SolveWithIlp(problem);
+             }
+         }
+-        catch
++        catch (Exception ex) when (ex is not OutOfMemoryException)
+         {
+             // ignore and fall back
+         }
+@@ -43,7 +49,7 @@ public sealed class IlpSolver : ISolver<DistanceMatrix, PermutationResult>
+         return hk.Solve(problem);
+     }
+ 
+-    private PermutationResult SolveWithIlp(DistanceMatrix problem)
++    private static PermutationResult SolveWithIlp(DistanceMatrix problem)
+     {
+         // Placeholder for a future real ILP integration. For now, delegate to Held-Karp
+         // to provide deterministic behaviour in tests and CI.
+-- 
+2.53.0

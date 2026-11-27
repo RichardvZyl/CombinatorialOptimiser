@@ -1,0 +1,63 @@
+From 4aec88c80524cd4447385a443906a51d8b9eef8f Mon Sep 17 00:00:00 2001
+From: "google-labs-jules[bot]"
+ <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 20:07:05 +0000
+Subject: [PATCH] fix: correct ISolver interface implementation
+
+---
+ CombinatorialOptimiser.Cli/Program.cs                   | 4 ++--
+ src/CombinatorialOptimiser/Permutation/RolloutSolver.cs | 5 +++++
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/CombinatorialOptimiser.Cli/Program.cs b/CombinatorialOptimiser.Cli/Program.cs
+index d5a5700..81373da 100644
+--- a/CombinatorialOptimiser.Cli/Program.cs
++++ b/CombinatorialOptimiser.Cli/Program.cs
+@@ -72,7 +72,7 @@ void PrintHelp()
+ }
+ 
+ var argCities = 0; var argSeed = -1; string? argSolver = null; var showHelp = false;
+-var argSeedChristofides = false;
++
+ for (var i = 0; i < args.Length; i++)
+ {
+     switch (args[i])
+@@ -83,7 +83,7 @@ for (var i = 0; i < args.Length; i++)
+         case "--beam-temp" when i + 1 < args.Length: _ = double.TryParse(args[++i], NumberStyles.Float, CultureInfo.InvariantCulture, out argBeamTemp); argBeamEnabled = true; break;
+         case "--beam-rank" when i + 1 < args.Length: argBeamRank = args[++i]; argBeamEnabled = true; break;
+         case "--help": case "-h": showHelp = true; break;
+-        case "--seed-christofides": argSeedChristofides = true; break;
++        
+     }
+ }
+ if (showHelp) { PrintHelp(); return; }
+diff --git a/src/CombinatorialOptimiser/Permutation/RolloutSolver.cs b/src/CombinatorialOptimiser/Permutation/RolloutSolver.cs
+index 35e0c2d..4adca79 100644
+--- a/src/CombinatorialOptimiser/Permutation/RolloutSolver.cs
++++ b/src/CombinatorialOptimiser/Permutation/RolloutSolver.cs
+@@ -14,18 +14,23 @@ public sealed class RolloutSolver : ISolver<DistanceMatrix, PermutationResult>
+ {
+     /// <summary>Human-readable name.</summary>
++    /// <inheritdoc/>
+     public string Name => "Rollout (one-step lookahead)";
+ 
+     /// <summary>Algorithmic paradigm.</summary>
++    /// <inheritdoc/>
+     public SolverParadigm Paradigm => SolverParadigm.Construction;
+ 
+     /// <summary>Base policy used for rollouts (defaults to nearest-neighbour).</summary>
++    /// <inheritdoc/>
+     public ISolver<DistanceMatrix, PermutationResult> BasePolicy { get; init; } = new NearestNeighborSolver();
+ 
+     /// <summary>Synchronous solve entrypoint.</summary>
++    /// <inheritdoc/>
+     public PermutationResult Solve(DistanceMatrix matrix) => SolverRunner.Timed(Name, Paradigm, matrix, () => SolveInternal(matrix));
+ 
+     private int[] SolveInternal(DistanceMatrix matrix)
+     {
++        ArgumentNullException.ThrowIfNull(matrix);
+         var n = matrix.Count;
+         var order = new List<int>();
+         var used = new HashSet<int>();
+-- 
+2.53.0

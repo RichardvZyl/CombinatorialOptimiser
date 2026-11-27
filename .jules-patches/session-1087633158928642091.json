@@ -1,0 +1,17 @@
+{
+  "sessionId": "1087633158928642091",
+  "extractedAt": "2026-11-09T23:38:00+02:00",
+  "uniquePatches": 21,
+  "appliedBranches": [
+    "feature/add-cp-sat",
+    "feature/add-diverse-beam",
+    "feature/add-mc-sampling",
+    "feature/add-rollout",
+    "feature/add-vns",
+    "feature/add-ilp",
+    "feature/add-grasp",
+    "feature/add-gnn-policy"
+  ],
+  "skippedBranches": ["feature/add-aco (PR #4 merged)"],
+  "wipPr3": "skipped (not cheap)"
+}
