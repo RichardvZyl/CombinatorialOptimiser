@@ -41,8 +41,6 @@ tools before relying on it — rendered context is a snapshot, not ground truth.
 
 ## Workspace State
 
-@query "git log --oneline -5 2>/dev/null || echo '(no git repo)'" fallback="git log unavailable"
-@query "git status --short 2>/dev/null || true" fallback="clean"
 
 ---
 
@@ -53,3 +51,15 @@ tools before relying on it — rendered context is a snapshot, not ground truth.
 
 ## Project Memory
 @memory focus=recent ttl=300
+
+<!-- PERSEUS:AUTO:START -->
+## Extracted Workspace Facts (Zero-Inference)
+- **Tier:** `worktree` | **Path:** `E:\Development\repositories\RichardvZyl\PermutationOptimiser\fix-pr3-wip-capture`
+- **Global context:** `E:\Development\.perseus\context.md`
+- **Parent repo context:** `E:\Development\repositories\RichardvZyl\PermutationOptimiser\root\.perseus\context.md`
+- **Conventions:** `E:\Development\.context\AGENTS.md` and `E:\Development\repositories\RichardvZyl\engineering-standards\root\standards`
+- **Git:** branch `fix/pr3-wip-capture-PR-PUB-20261119` | HEAD `09d1dd5 fix: drop empty solver placeholders, repair AGENTS.md encoding, portable hook path (PR-PUB-20261119)` | 1 dirty
+- **Stacks & manifests (depth 0-1):** .NET: `CombinatorialOptimiser.Cli\CombinatorialOptimiser.Cli.csproj`, `CombinatorialOptimiser.slnx`, `CombinatorialOptimiser.Tests\CombinatorialOptimiser.Tests.csproj`
+- **Docs:** `AGENTS.md`, `CLAUDE.md`, `README.md`, `.perseus\pack.yaml`
+- **Working memory:** none
+<!-- PERSEUS:AUTO:END -->
