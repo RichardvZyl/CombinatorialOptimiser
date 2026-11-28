@@ -1,36 +1,40 @@
 # AGENTS.md
 
+## Branching location
+
+Branching is ONLY allowed from a git repo under E:\Development\repositories\RichardvZyl, and ONLY as a new worktree next to that repo's root\ (E:\Development\repositories\RichardvZyl\{repo}\{new-worktree}). Never branch inside root\ itself, never branch anywhere else.
+
 Read this first each session instead of re-scanning the whole tree. For deeper
 detail see `README.md` (usage + algorithm tables) and `PROJECT_INFO.md`
 (architecture + abstractions). This file is the quick orientation.
 
 ## What this is
 
-`CombinatorialOptimiser` — a **dependency-free .NET 10** combinatorial
+`CombinatorialOptimiser` â€” a **dependency-free .NET 10** combinatorial
 optimisation library (plus a CLI). Solves three problem domains with 20+
 classic algorithms across four paradigms (Exact, Construction, Improvement,
 Reduction), reporting cost, gap-to-optimal, and run time for comparison.
 
 | Domain | Problem | Solvers |
 |--------|---------|---------|
-| **Permutation** | TSP-style ordering (minimise tour cost) | 11 — primary focus |
+| **Permutation** | TSP-style ordering (minimise tour cost) | 11 â€” primary focus |
 | **SubsetSelection** | 0/1 knapsack (maximise value under capacity) | 5 |
 | **ConstraintAssignment** | graph colouring (no conflicting pair shares a label) | 4 |
 
-The Permutation domain type is `Node` (not `City`) on purpose — the same
+The Permutation domain type is `Node` (not `City`) on purpose â€” the same
 algorithms serve scheduling, routing, wiring, etc.
 
 ## Solution layout (3 projects, `CombinatorialOptimiser.slnx`)
 
 ```
 src/CombinatorialOptimiser/        # the LIBRARY (OutputType=Library, packable NuGet)
-├── Core/                          # ISolver<TProblem,TResult>, ISolver, SolverResult, Node, DistanceMatrix, SolverRegistry
-│   └── Metaheuristics/            # shared SA / GA / ILS base classes (domains subclass these)
-├── Permutation/                   # 11 TSP solvers
-├── SubsetSelection/               # 5 knapsack solvers
-└── ConstraintAssignment/          # 4 graph-colouring solvers
+â”œâ”€â”€ Core/                          # ISolver<TProblem,TResult>, ISolver, SolverResult, Node, DistanceMatrix, SolverRegistry
+â”‚   â””â”€â”€ Metaheuristics/            # shared SA / GA / ILS base classes (domains subclass these)
+â”œâ”€â”€ Permutation/                   # 11 TSP solvers
+â”œâ”€â”€ SubsetSelection/               # 5 knapsack solvers
+â””â”€â”€ ConstraintAssignment/          # 4 graph-colouring solvers
 
-CombinatorialOptimiser.Cli/        # console app (OutputType=Exe) — Program.cs, demos + CLI args
+CombinatorialOptimiser.Cli/        # console app (OutputType=Exe) â€” Program.cs, demos + CLI args
 CombinatorialOptimiser.Tests/      # xUnit (~62+ tests)
 ```
 
@@ -57,21 +61,21 @@ dotnet run --project CombinatorialOptimiser.Cli -c Release -- --cities 8 --solve
 dotnet pack src/CombinatorialOptimiser/CombinatorialOptimiser.csproj -c Release
 ```
 The library lives in `src/CombinatorialOptimiser/` and has no `OutputType=Exe`
-— run the CLI project for the demo app.
+â€” run the CLI project for the demo app.
 
 ## Conventions / gotchas
 
 - **British spelling** in domain language: *optimiser, colouring* (but
-  `NearestNeighbor` keeps the US spelling — match existing names when editing).
+  `NearestNeighbor` keeps the US spelling â€” match existing names when editing).
 - Strict build: `Nullable` enabled, `ImplicitUsings` on,
   `TreatWarningsAsErrors=true`, analyzers at `AllEnabledByDefault`. A handful of
-  CA rules are suppressed via `NoWarn` with justifying comments in the csproj —
+  CA rules are suppressed via `NoWarn` with justifying comments in the csproj â€”
   read those before adding new suppressions.
 - Always format with `CultureInfo.InvariantCulture` (CA1303/localisation is
   intentionally out of scope).
 - Library exposes internals to Tests + Cli via `InternalsVisibleTo`.
 - Multidimensional arrays (cost/conflict/DP tables) are intentional for cache
-  locality — don't "fix" them to jagged.
+  locality â€” don't "fix" them to jagged.
 
 ## Current state (as of 2026-06-14)
 
@@ -82,14 +86,14 @@ green: library lives in `src/CombinatorialOptimiser/`, `dotnet build`/`test`/
 `Solve(problem, ct)`/`SolveAsync` cancellation is wired through the SA/GA/ILS
 solvers.
 
-The library is a general-purpose, domain-agnostic optimisation package — it
+The library is a general-purpose, domain-agnostic optimisation package â€” it
 carries no knowledge of any consuming application. Keep it that way: anything
 about *how* or *why* it's consumed belongs in the consuming code, not here.
 
 ## Memory and workspace context (Perseus)
 
 ### Shared Vault (all repos on this machine)
-- Store: `${PERSEUS_VAULT}` (default `E:\Development\.perseus-vault`) via **`perseus-vault`** MCP (`perseus_vault_*` tools).
+- Store: `E:\Richard's files\Development\.perseus-vault` via **`perseus-vault`** MCP (`perseus_vault_*` tools).
 - **Read when:** session start (`perseus_vault_context`); before re-deciding something that may already be settled; looking up cross-repo conventions/facts.
 - **Write when:** durable facts, decisions, conventions (`perseus_vault_remember`); journal meaningful events. Prefer consolidate related memories over duplicates.
 - **Never write:** secrets, credentials, API keys, or session/chat transcripts (use https://perseus.observer/ledger/ for session history if needed).
@@ -100,19 +104,4 @@ about *how* or *why* it's consumed belongs in the consuming code, not here.
 - **Write when:** project-specific status, constraints, architecture notes, and handoff briefing — keep them here, not in the shared Vault, unless they are true cross-repo conventions.
 - Do **not** reuse another project's `.perseus` briefing.
 
-## Memory Recall (on demand)
 
-Long-term memory is not pre-loaded into this context (profile: default, memory posture: on_demand).
-Retrieve exactly what a task needs, when it needs it:
-
-- `@memory mode=search query="<topic>" k=5` — local project memory (FTS5)
-- `@memory mode=narrative` — the distilled project narrative
-- MCP tools: `perseus_memory` (local recall), `perseus_mneme` (cross-session vault)
-
-Query the vault when a past decision, architecture note, or prior-session
-fact would change your answer; otherwise proceed without it.
-
-_Persistent cross-session memory (Perseus Vault) is optional. If recall returns
-nothing, it may not be installed — run `perseus doctor` to check._
-
-<!-- perseus: @memory static dump suppressed (memory posture: on_demand); use mode=narrative or force=true to inject entries. -->
